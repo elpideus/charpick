@@ -159,7 +159,12 @@ impl Canvas for CairoCanvas<'_> {
             }
             Icon::Keyboard => {
                 let (w, h) = (s * 0.96, s * 0.6);
-                let body = crate::gfx::rect((cx - w / 2.0) as f32, (cy - h / 2.0) as f32, (cx + w / 2.0) as f32, (cy + h / 2.0) as f32);
+                let body = crate::gfx::rect(
+                    (cx - w / 2.0) as f32,
+                    (cy - h / 2.0) as f32,
+                    (cx + w / 2.0) as f32,
+                    (cy + h / 2.0) as f32,
+                );
                 rounded(cr, body, (s * 0.08) as f32);
                 let _ = cr.stroke();
                 // Three rows of keys, the last one with a space bar.
@@ -245,7 +250,12 @@ fn make_shadow(p: &Picker, w: i32, h: i32, scale: f64) -> Option<ImageSurface> {
         let cr = Context::new(&mask).ok()?;
         cr.scale(scale, scale);
         let m = &p.theme.m;
-        let r = Rect { left: MARGIN, top: MARGIN + SHADOW_DY as f32, right: MARGIN + m.width, bottom: MARGIN + m.height + SHADOW_DY as f32 };
+        let r = Rect {
+            left: MARGIN,
+            top: MARGIN + SHADOW_DY as f32,
+            right: MARGIN + m.width,
+            bottom: MARGIN + m.height + SHADOW_DY as f32,
+        };
         rounded(&cr, r, m.radius);
         cr.set_source_rgba(0.0, 0.0, 0.0, 1.0);
         cr.fill().ok()?;

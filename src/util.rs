@@ -86,7 +86,9 @@ mod win {
         RegGetValueW, RegSetKeyValueW,
     };
     use windows::Win32::UI::Shell::{FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, SHGetKnownFolderPath};
-    use windows::Win32::UI::WindowsAndMessaging::{MB_ICONERROR, MB_ICONINFORMATION, MB_OK, MESSAGEBOX_STYLE, MessageBoxW};
+    use windows::Win32::UI::WindowsAndMessaging::{
+        MB_ICONERROR, MB_ICONINFORMATION, MB_OK, MESSAGEBOX_STYLE, MessageBoxW,
+    };
     use windows_core::{PCWSTR, s, w};
 
     use crate::gfx::Color;
@@ -176,7 +178,15 @@ mod win {
         let mut data = 0u32;
         let mut size = 4u32;
         let r = unsafe {
-            RegGetValueW(root, pcwstr(&k), pcwstr(&v), RRF_RT_REG_DWORD, None, Some(&mut data as *mut u32 as *mut c_void), Some(&mut size))
+            RegGetValueW(
+                root,
+                pcwstr(&k),
+                pcwstr(&v),
+                RRF_RT_REG_DWORD,
+                None,
+                Some(&mut data as *mut u32 as *mut c_void),
+                Some(&mut size),
+            )
         };
         (r == ERROR_SUCCESS).then_some(data)
     }
@@ -190,7 +200,15 @@ mod win {
             }
             let mut buf = vec![0u8; size as usize];
             let mut ty = REG_VALUE_TYPE(0);
-            let r = RegGetValueW(root, pcwstr(&k), pcwstr(&v), RRF_RT_ANY, Some(&mut ty), Some(buf.as_mut_ptr() as *mut c_void), Some(&mut size));
+            let r = RegGetValueW(
+                root,
+                pcwstr(&k),
+                pcwstr(&v),
+                RRF_RT_ANY,
+                Some(&mut ty),
+                Some(buf.as_mut_ptr() as *mut c_void),
+                Some(&mut size),
+            );
             (r == ERROR_SUCCESS).then(|| {
                 buf.truncate(size as usize);
                 buf
@@ -200,7 +218,8 @@ mod win {
 
     pub fn reg_get_string(root: HKEY, key: &str, value: &str) -> Option<String> {
         let bytes = reg_get_binary(root, key, value)?;
-        let words: Vec<u16> = bytes.chunks_exact(2).map(|c| u16::from_le_bytes([c[0], c[1]])).take_while(|&c| c != 0).collect();
+        let words: Vec<u16> =
+            bytes.as_chunks::<2>().0.iter().map(|&c| u16::from_le_bytes(c)).take_while(|&c| c != 0).collect();
         Some(String::from_utf16_lossy(&words))
     }
 
@@ -208,15 +227,22 @@ mod win {
         let (k, v) = (wide(key), wide(value));
         let bytes = data.to_le_bytes();
         unsafe {
-            RegSetKeyValueW(root, pcwstr(&k), pcwstr(&v), REG_DWORD.0, Some(bytes.as_ptr() as *const c_void), 4) == ERROR_SUCCESS
+            RegSetKeyValueW(root, pcwstr(&k), pcwstr(&v), REG_DWORD.0, Some(bytes.as_ptr() as *const c_void), 4)
+                == ERROR_SUCCESS
         }
     }
 
     pub fn reg_set_string(root: HKEY, key: &str, value: &str, data: &str) -> bool {
         let (k, v, d) = (wide(key), wide(value), wide(data));
         unsafe {
-            RegSetKeyValueW(root, pcwstr(&k), pcwstr(&v), REG_SZ.0, Some(d.as_ptr() as *const c_void), (d.len() * 2) as u32)
-                == ERROR_SUCCESS
+            RegSetKeyValueW(
+                root,
+                pcwstr(&k),
+                pcwstr(&v),
+                REG_SZ.0,
+                Some(d.as_ptr() as *const c_void),
+                (d.len() * 2) as u32,
+            ) == ERROR_SUCCESS
         }
     }
 
@@ -292,11 +318,18 @@ mod win {
 
     pub fn high_contrast() -> bool {
         use windows::Win32::UI::Accessibility::{HCF_HIGHCONTRASTON, HIGHCONTRASTW};
-        use windows::Win32::UI::WindowsAndMessaging::{SPI_GETHIGHCONTRAST, SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS, SystemParametersInfoW};
+        use windows::Win32::UI::WindowsAndMessaging::{
+            SPI_GETHIGHCONTRAST, SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS, SystemParametersInfoW,
+        };
         let mut hc = HIGHCONTRASTW { cbSize: std::mem::size_of::<HIGHCONTRASTW>() as u32, ..Default::default() };
         unsafe {
-            SystemParametersInfoW(SPI_GETHIGHCONTRAST, hc.cbSize, Some(&mut hc as *mut _ as *mut c_void), SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS(0))
-                .is_ok()
+            SystemParametersInfoW(
+                SPI_GETHIGHCONTRAST,
+                hc.cbSize,
+                Some(&mut hc as *mut _ as *mut c_void),
+                SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS(0),
+            )
+            .is_ok()
                 && hc.dwFlags.contains(HCF_HIGHCONTRASTON)
         }
     }

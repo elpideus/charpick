@@ -73,7 +73,11 @@ impl Prompt {
             title: "Press the new shortcut".into(),
             text: format!("Hold Ctrl, Alt or {WIN_NAME} and press a key. Esc cancels."),
             keys: held.parts(),
-            hint: if current.is_none() { "No shortcut is set".into() } else { format!("Current shortcut: {}", current.label()) },
+            hint: if current.is_none() {
+                "No shortcut is set".into()
+            } else {
+                format!("Current shortcut: {}", current.label())
+            },
             warn: false,
         }
     }
@@ -345,10 +349,13 @@ impl Picker {
 
     pub fn hit_test(&self, x: f32, y: f32) -> Hit {
         let m = &self.theme.m;
-        if let Some(r) = self.close_rect() {
-            if x >= r.left && x < r.right && y >= r.top && y < r.bottom {
-                return Hit::Close;
-            }
+        if let Some(r) = self.close_rect()
+            && x >= r.left
+            && x < r.right
+            && y >= r.top
+            && y < r.bottom
+        {
+            return Hit::Close;
         }
         if self.prompt.is_some() {
             return Hit::Other;
@@ -770,7 +777,8 @@ impl Picker {
             cv.fill(rect(0.0, m.top_h - px, m.width, m.top_h), 0.0, c.divider);
         }
         if self.caret_on {
-            let (ct, cb) = if win11 { (sr.top + 8.0, sr.bottom - 8.0) } else { (m.top_h / 2.0 - 9.0, m.top_h / 2.0 + 9.0) };
+            let (ct, cb) =
+                if win11 { (sr.top + 8.0, sr.bottom - 8.0) } else { (m.top_h / 2.0 - 9.0, m.top_h / 2.0 + 9.0) };
             cv.fill(rect(caret_x, ct, caret_x + px.max(1.0), cb), 0.0, c.text);
         }
 
@@ -858,7 +866,11 @@ impl Picker {
                 let g = e.text(self.upper);
                 cv.text(g, Font::InfoGlyph, rect(ib.left, iy, ib.left + 28.0, iy + m.info_h), c.text);
                 let langs = self.catalog.languages_of(id);
-                let line = if langs.is_empty() { e.name(self.upper).to_string() } else { format!("{}  ·  {}", e.name(self.upper), langs) };
+                let line = if langs.is_empty() {
+                    e.name(self.upper).to_string()
+                } else {
+                    format!("{}  ·  {}", e.name(self.upper), langs)
+                };
                 cv.text(&line, Font::Info, rect(ib.left + 34.0, iy, ib.right, iy + m.info_h), c.text2);
             }
         }
@@ -974,7 +986,11 @@ impl Picker {
             let h = px.max(1.0) / 2.0;
             cv.stroke(rect(r.left + h, r.top + h, r.right - h, r.bottom - h), 6.0, px.max(1.0), c.field_border);
             // A thicker bottom edge makes the rectangle read as a key.
-            cv.fill(rect(r.left + 3.0, r.bottom - 2.0 * px.max(1.0), r.right - 3.0, r.bottom - px.max(1.0)), 0.0, c.field_border);
+            cv.fill(
+                rect(r.left + 3.0, r.bottom - 2.0 * px.max(1.0), r.right - 3.0, r.bottom - px.max(1.0)),
+                0.0,
+                c.field_border,
+            );
             cv.text(k, Font::Key, rect(r.left, r.top, r.right, r.bottom - 1.0), c.text);
             x += w + gap;
         }
@@ -983,6 +999,11 @@ impl Picker {
         }
 
         let hy = m.height - 64.0;
-        cv.text(&p.hint, Font::Message, rect(20.0, hy, m.width - 20.0, m.height - 12.0), if p.warn { c.accent } else { c.text3 });
+        cv.text(
+            &p.hint,
+            Font::Message,
+            rect(20.0, hy, m.width - 20.0, m.height - 12.0),
+            if p.warn { c.accent } else { c.text3 },
+        );
     }
 }

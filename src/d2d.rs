@@ -7,17 +7,18 @@ use windows::Win32::Graphics::Direct2D::Common::{
     D2D_RECT_F, D2D_SIZE_U, D2D1_ALPHA_MODE_PREMULTIPLIED, D2D1_COLOR_F, D2D1_PIXEL_FORMAT,
 };
 use windows::Win32::Graphics::Direct2D::{
-    D2D1_ANTIALIAS_MODE_PER_PRIMITIVE, D2D1_DRAW_TEXT_OPTIONS_NONE, D2D1_FACTORY_TYPE_SINGLE_THREADED, D2D1_FEATURE_LEVEL_DEFAULT,
-    D2D1_HWND_RENDER_TARGET_PROPERTIES, D2D1_PRESENT_OPTIONS_NONE, D2D1_RENDER_TARGET_PROPERTIES, D2D1_RENDER_TARGET_TYPE_DEFAULT,
-    D2D1_RENDER_TARGET_TYPE_SOFTWARE, D2D1_RENDER_TARGET_USAGE_NONE, D2D1_ROUNDED_RECT, D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE,
-    D2D1CreateFactory, ID2D1Factory, ID2D1HwndRenderTarget, ID2D1RenderTarget, ID2D1SolidColorBrush,
+    D2D1_ANTIALIAS_MODE_PER_PRIMITIVE, D2D1_DRAW_TEXT_OPTIONS_NONE, D2D1_FACTORY_TYPE_SINGLE_THREADED,
+    D2D1_FEATURE_LEVEL_DEFAULT, D2D1_HWND_RENDER_TARGET_PROPERTIES, D2D1_PRESENT_OPTIONS_NONE,
+    D2D1_RENDER_TARGET_PROPERTIES, D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1_RENDER_TARGET_TYPE_SOFTWARE,
+    D2D1_RENDER_TARGET_USAGE_NONE, D2D1_ROUNDED_RECT, D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE, D2D1CreateFactory,
+    ID2D1Factory, ID2D1HwndRenderTarget, ID2D1RenderTarget, ID2D1SolidColorBrush,
 };
 use windows::Win32::Graphics::DirectWrite::{
     DWRITE_FACTORY_TYPE_SHARED, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_WEIGHT_NORMAL,
-    DWRITE_FONT_WEIGHT_SEMI_BOLD, DWRITE_MEASURING_MODE_NATURAL, DWRITE_PARAGRAPH_ALIGNMENT_CENTER, DWRITE_PARAGRAPH_ALIGNMENT_NEAR,
-    DWRITE_TEXT_ALIGNMENT_CENTER, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_TEXT_METRICS, DWRITE_TRIMMING, DWRITE_TRIMMING_GRANULARITY_CHARACTER,
-    DWRITE_WORD_WRAPPING_NO_WRAP, DWRITE_WORD_WRAPPING_WRAP, DWriteCreateFactory, IDWriteFactory, IDWriteFontCollection,
-    IDWriteTextFormat,
+    DWRITE_FONT_WEIGHT_SEMI_BOLD, DWRITE_MEASURING_MODE_NATURAL, DWRITE_PARAGRAPH_ALIGNMENT_CENTER,
+    DWRITE_PARAGRAPH_ALIGNMENT_NEAR, DWRITE_TEXT_ALIGNMENT_CENTER, DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_TEXT_METRICS,
+    DWRITE_TRIMMING, DWRITE_TRIMMING_GRANULARITY_CHARACTER, DWRITE_WORD_WRAPPING_NO_WRAP, DWRITE_WORD_WRAPPING_WRAP,
+    DWriteCreateFactory, IDWriteFactory, IDWriteFontCollection, IDWriteTextFormat,
 };
 use windows::Win32::Graphics::Dxgi::Common::DXGI_FORMAT_B8G8R8A8_UNORM;
 use windows_core::{BOOL, PCWSTR};
@@ -99,7 +100,8 @@ impl Gfx {
 
     fn make_format(&self, s: &FontSpec) -> windows_core::Result<IDWriteTextFormat> {
         let fam = wide(&s.family);
-        let weight = if s.weight == Weight::SemiBold { DWRITE_FONT_WEIGHT_SEMI_BOLD } else { DWRITE_FONT_WEIGHT_NORMAL };
+        let weight =
+            if s.weight == Weight::SemiBold { DWRITE_FONT_WEIGHT_SEMI_BOLD } else { DWRITE_FONT_WEIGHT_NORMAL };
         unsafe {
             let f = self.dw.CreateTextFormat(
                 PCWSTR(fam.as_ptr()),
@@ -110,7 +112,11 @@ impl Gfx {
                 s.size,
                 windows_core::w!(""),
             )?;
-            f.SetTextAlignment(if s.align == Align::Center { DWRITE_TEXT_ALIGNMENT_CENTER } else { DWRITE_TEXT_ALIGNMENT_LEADING })?;
+            f.SetTextAlignment(if s.align == Align::Center {
+                DWRITE_TEXT_ALIGNMENT_CENTER
+            } else {
+                DWRITE_TEXT_ALIGNMENT_LEADING
+            })?;
             if s.wrap {
                 f.SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP)?;
                 f.SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR)?;
@@ -120,7 +126,11 @@ impl Gfx {
             }
             if s.ellipsis {
                 let sign = self.dw.CreateEllipsisTrimmingSign(&f)?;
-                let trim = DWRITE_TRIMMING { granularity: DWRITE_TRIMMING_GRANULARITY_CHARACTER, delimiter: 0, delimiterCount: 0 };
+                let trim = DWRITE_TRIMMING {
+                    granularity: DWRITE_TRIMMING_GRANULARITY_CHARACTER,
+                    delimiter: 0,
+                    delimiterCount: 0,
+                };
                 f.SetTrimming(&trim, &sign)?;
             }
             Ok(f)
@@ -177,7 +187,10 @@ impl Gfx {
         let (w, h) = p.size_px(self.dpi);
         let props = D2D1_RENDER_TARGET_PROPERTIES {
             r#type: if self.gpu { D2D1_RENDER_TARGET_TYPE_DEFAULT } else { D2D1_RENDER_TARGET_TYPE_SOFTWARE },
-            pixelFormat: D2D1_PIXEL_FORMAT { format: DXGI_FORMAT_B8G8R8A8_UNORM, alphaMode: D2D1_ALPHA_MODE_PREMULTIPLIED },
+            pixelFormat: D2D1_PIXEL_FORMAT {
+                format: DXGI_FORMAT_B8G8R8A8_UNORM,
+                alphaMode: D2D1_ALPHA_MODE_PREMULTIPLIED,
+            },
             dpiX: 0.0,
             dpiY: 0.0,
             usage: D2D1_RENDER_TARGET_USAGE_NONE,
@@ -215,10 +228,10 @@ impl Gfx {
             p.draw(&mut D2dCanvas { rt, brush, fmt, dw: &self.dw });
             rt.EndDraw(None, None)
         };
-        if let Err(e) = result {
-            if e.code() == D2DERR_RECREATE_TARGET {
-                self.reset_device();
-            }
+        if let Err(e) = result
+            && e.code() == D2DERR_RECREATE_TARGET
+        {
+            self.reset_device();
         }
     }
 
@@ -240,7 +253,10 @@ impl Gfx {
             let bitmap = wic.CreateBitmap(w as u32, h as u32, &GUID_WICPixelFormat32bppPBGRA, WICBitmapCacheOnLoad)?;
             let props = D2D1_RENDER_TARGET_PROPERTIES {
                 r#type: D2D1_RENDER_TARGET_TYPE_DEFAULT,
-                pixelFormat: D2D1_PIXEL_FORMAT { format: DXGI_FORMAT_B8G8R8A8_UNORM, alphaMode: D2D1_ALPHA_MODE_PREMULTIPLIED },
+                pixelFormat: D2D1_PIXEL_FORMAT {
+                    format: DXGI_FORMAT_B8G8R8A8_UNORM,
+                    alphaMode: D2D1_ALPHA_MODE_PREMULTIPLIED,
+                },
                 dpiX: p.dpi() as f32,
                 dpiY: p.dpi() as f32,
                 usage: D2D1_RENDER_TARGET_USAGE_NONE,
@@ -285,7 +301,14 @@ impl D2dCanvas<'_> {
     fn draw_text(&self, s: &str, fmt: &IDWriteTextFormat, r: Rect, c: Color) {
         unsafe {
             self.brush.SetColor(&col(c));
-            self.rt.DrawText(&utf16(s), fmt, &d2r(r), self.brush, D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+            self.rt.DrawText(
+                &utf16(s),
+                fmt,
+                &d2r(r),
+                self.brush,
+                D2D1_DRAW_TEXT_OPTIONS_NONE,
+                DWRITE_MEASURING_MODE_NATURAL,
+            );
         }
     }
 }
@@ -295,7 +318,10 @@ impl Canvas for D2dCanvas<'_> {
         unsafe {
             self.brush.SetColor(&col(c));
             if radius > 0.0 {
-                self.rt.FillRoundedRectangle(&D2D1_ROUNDED_RECT { rect: d2r(r), radiusX: radius, radiusY: radius }, self.brush);
+                self.rt.FillRoundedRectangle(
+                    &D2D1_ROUNDED_RECT { rect: d2r(r), radiusX: radius, radiusY: radius },
+                    self.brush,
+                );
             } else {
                 self.rt.FillRectangle(&d2r(r), self.brush);
             }
@@ -324,7 +350,9 @@ impl Canvas for D2dCanvas<'_> {
 
     fn measure(&mut self, s: &str, font: Font) -> f32 {
         unsafe {
-            let Ok(layout) = self.dw.CreateTextLayout(&utf16(s), &self.fmt.text[&font], 4000.0, 100.0) else { return 0.0 };
+            let Ok(layout) = self.dw.CreateTextLayout(&utf16(s), &self.fmt.text[&font], 4000.0, 100.0) else {
+                return 0.0;
+            };
             let mut m = DWRITE_TEXT_METRICS::default();
             if layout.GetMetrics(&mut m).is_ok() { m.widthIncludingTrailingWhitespace } else { 0.0 }
         }

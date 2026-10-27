@@ -73,10 +73,10 @@ pub fn serve(listener: UnixListener, tx: Sender<Cmd>) {
             let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
             for line in BufReader::new(stream).lines().map_while(Result::ok) {
                 log!("ipc   received {line:?}");
-                if let Some(cmd) = parse(&line) {
-                    if tx.send(cmd).is_err() {
-                        return;
-                    }
+                if let Some(cmd) = parse(&line)
+                    && tx.send(cmd).is_err()
+                {
+                    return;
                 }
             }
         }

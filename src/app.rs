@@ -13,7 +13,8 @@ use windows::Win32::Graphics::Dwm::{
     DWMWCP_ROUND, DWMWINDOWATTRIBUTE, DwmExtendFrameIntoClientArea, DwmSetWindowAttribute,
 };
 use windows::Win32::Graphics::Gdi::{
-    BeginPaint, EndPaint, GetMonitorInfoW, InvalidateRect, MONITOR_DEFAULTTONEAREST, MONITORINFO, MonitorFromRect, PAINTSTRUCT,
+    BeginPaint, EndPaint, GetMonitorInfoW, InvalidateRect, MONITOR_DEFAULTTONEAREST, MONITORINFO, MonitorFromRect,
+    PAINTSTRUCT,
 };
 use windows::Win32::System::LibraryLoader::{GetModuleHandleW, GetProcAddress};
 use windows::Win32::System::Power::{POWERBROADCAST_SETTING, RegisterPowerSettingNotification};
@@ -22,17 +23,18 @@ use windows::Win32::System::SystemInformation::GetTickCount;
 use windows::Win32::UI::Accessibility::{HWINEVENTHOOK, SetWinEventHook, UnhookWinEvent};
 use windows::Win32::UI::Controls::{LIM_SMALL, LoadIconMetric, MARGINS, WM_MOUSELEAVE};
 use windows::Win32::UI::HiDpi::{GetDpiForMonitor, MDT_EFFECTIVE_DPI};
-use windows::Win32::UI::Input::{
-    GetRawInputData, HRAWINPUT, RAWINPUT, RAWINPUTDEVICE, RAWINPUTHEADER, RID_INPUT, RIDEV_INPUTSINK, RIM_TYPEKEYBOARD, RegisterRawInputDevices,
-};
 use windows::Win32::UI::Input::KeyboardAndMouse::{
-    GetAsyncKeyState, GetKeyState, LASTINPUTINFO, GetLastInputInfo, ReleaseCapture, SetCapture, TME_LEAVE, TRACKMOUSEEVENT,
-    TrackMouseEvent,
+    GetAsyncKeyState, GetKeyState, GetLastInputInfo, LASTINPUTINFO, ReleaseCapture, SetCapture, TME_LEAVE,
+    TRACKMOUSEEVENT, TrackMouseEvent,
+};
+use windows::Win32::UI::Input::{
+    GetRawInputData, HRAWINPUT, RAWINPUT, RAWINPUTDEVICE, RAWINPUTHEADER, RID_INPUT, RIDEV_INPUTSINK, RIM_TYPEKEYBOARD,
+    RegisterRawInputDevices,
 };
 use windows::Win32::UI::Shell::{
-    NIF_ICON, NIF_INFO, NIF_MESSAGE, NIF_SHOWTIP, NIF_TIP, NIIF_INFO, NIIF_RESPECT_QUIET_TIME, NIM_ADD, NIM_DELETE, NIM_MODIFY,
-    NIM_SETVERSION, NIN_BALLOONUSERCLICK, NIN_SELECT, NINF_KEY, NOTIFYICON_VERSION_4, NOTIFYICONDATAW, ShellExecuteW,
-    Shell_NotifyIconW,
+    NIF_ICON, NIF_INFO, NIF_MESSAGE, NIF_SHOWTIP, NIF_TIP, NIIF_INFO, NIIF_RESPECT_QUIET_TIME, NIM_ADD, NIM_DELETE,
+    NIM_MODIFY, NIM_SETVERSION, NIN_BALLOONUSERCLICK, NIN_SELECT, NINF_KEY, NOTIFYICON_VERSION_4, NOTIFYICONDATAW,
+    Shell_NotifyIconW, ShellExecuteW,
 };
 use windows::Win32::UI::WindowsAndMessaging::*;
 use windows_core::{BOOL, GUID, PCWSTR, s, w};
@@ -40,8 +42,8 @@ use windows_core::{BOOL, GUID, PCWSTR, s, w};
 use crate::Options;
 use crate::caret::{self, CaretWorker, WM_CARET};
 use crate::d2d::Gfx;
-use crate::diag::{self, diag};
 use crate::data::Catalog;
+use crate::diag::{self, diag};
 use crate::hook;
 use crate::lockpolicy::{self, Elevation};
 use crate::picker::{Action, Nav, Picker, Recorded};
@@ -219,7 +221,11 @@ fn apply_window_style(win: HWND, t: &Theme) {
     dwm_set(win, DWMWA_TRANSITIONS_FORCEDISABLED, 1);
     if util::is_windows11() {
         let round = t.kind != Kind::Win10;
-        dwm_set(win, DWMWA_WINDOW_CORNER_PREFERENCE, if round { DWMWCP_ROUND.0 as u32 } else { DWMWCP_DONOTROUND.0 as u32 });
+        dwm_set(
+            win,
+            DWMWA_WINDOW_CORNER_PREFERENCE,
+            if round { DWMWCP_ROUND.0 as u32 } else { DWMWCP_DONOTROUND.0 as u32 },
+        );
         // The Windows 10 look draws its own square border.
         dwm_set(win, DWMWA_BORDER_COLOR, if round { 0xFFFF_FFFF } else { 0xFFFF_FFFE });
     }
@@ -356,7 +362,12 @@ impl App {
     }
 
     fn caret_done(&mut self, id: usize, info: Option<caret::CaretInfo>) {
-        diag!("app   caret {} (request {id}, current {}, pending={})", if info.is_some() { "found" } else { "not found" }, self.req, self.pending);
+        diag!(
+            "app   caret {} (request {id}, current {}, pending={})",
+            if info.is_some() { "found" } else { "not found" },
+            self.req,
+            self.pending
+        );
         if self.pending && id == self.req {
             self.show_at(info.map(|i| i.rect));
         }
@@ -714,7 +725,12 @@ impl App {
     }
 
     fn tray_data(&self) -> NOTIFYICONDATAW {
-        NOTIFYICONDATAW { cbSize: std::mem::size_of::<NOTIFYICONDATAW>() as u32, hWnd: self.ctl, uID: 1, ..Default::default() }
+        NOTIFYICONDATAW {
+            cbSize: std::mem::size_of::<NOTIFYICONDATAW>() as u32,
+            hWnd: self.ctl,
+            uID: 1,
+            ..Default::default()
+        }
     }
 
     fn load_tray_icon(&mut self) {
@@ -801,13 +817,19 @@ impl App {
             };
             let check = |on: bool| if on { MF_CHECKED } else { MF_UNCHECKED };
 
-            add(menu, MF_STRING | MF_GRAYED, 0, &format!("{APP_NAME}: {} opens the picker", self.settings.hotkey.label()));
+            add(
+                menu,
+                MF_STRING | MF_GRAYED,
+                0,
+                &format!("{APP_NAME}: {} opens the picker", self.settings.hotkey.label()),
+            );
             add(menu, MF_STRING, ID_SHORTCUT, "Change shortcut…");
             let _ = AppendMenuW(menu, MF_SEPARATOR, 0, None);
             match self.winl {
                 WinL::Ready => {
                     let lk = self.settings.lock_hotkey;
-                    let label = if lk.is_none() { "Lock this PC".to_string() } else { format!("Lock this PC\t{}", lk.label()) };
+                    let label =
+                        if lk.is_none() { "Lock this PC".to_string() } else { format!("Lock this PC\t{}", lk.label()) };
                     add(menu, MF_STRING, ID_LOCK, &label);
                 }
                 WinL::NeedsSetup => add(menu, MF_STRING, ID_WINL_SETUP, "Let Win+L open Charpick…"),
@@ -993,7 +1015,13 @@ fn log_raw_input(lp: LPARAM) {
     let mut raw = RAWINPUT::default();
     let mut size = std::mem::size_of::<RAWINPUT>() as u32;
     let n = unsafe {
-        GetRawInputData(HRAWINPUT(lp.0 as _), RID_INPUT, Some(&mut raw as *mut _ as *mut _), &mut size, std::mem::size_of::<RAWINPUTHEADER>() as u32)
+        GetRawInputData(
+            HRAWINPUT(lp.0 as _),
+            RID_INPUT,
+            Some(&mut raw as *mut _ as *mut _),
+            &mut size,
+            std::mem::size_of::<RAWINPUTHEADER>() as u32,
+        )
     };
     if n == u32::MAX || raw.header.dwType != RIM_TYPEKEYBOARD.0 {
         return;
@@ -1037,7 +1065,10 @@ unsafe extern "system" fn ctl_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
                 }
             }
             hook::WM_HK_HIDE => {
-                diag!("ctl   hide request ({})", ["shortcut again", "other shortcut", "click outside"].get(wp.0).unwrap_or(&"?"));
+                diag!(
+                    "ctl   hide request ({})",
+                    ["shortcut again", "other shortcut", "click outside"].get(wp.0).unwrap_or(&"?")
+                );
                 with(|a| a.hide());
             }
             hook::WM_HK_KEY => _ = with(|a| a.key(wp.0 as u32, lp.0)),
@@ -1089,7 +1120,9 @@ unsafe extern "system" fn ctl_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
                 _ => {}
             },
             WM_TRAY => match (lp.0 & 0xFFFF) as u32 {
-                WM_CONTEXTMENU | NIN_SELECT | NIN_KEYSELECT => show_menu(hwnd, loword(wp.0 as isize), hiword(wp.0 as isize)),
+                WM_CONTEXTMENU | NIN_SELECT | NIN_KEYSELECT => {
+                    show_menu(hwnd, loword(wp.0 as isize), hiword(wp.0 as isize))
+                }
                 NIN_BALLOONUSERCLICK => {
                     let action = with(|a| std::mem::replace(&mut a.balloon_action, BalloonAction::None));
                     if action == Some(BalloonAction::SetupWinL) {
@@ -1102,13 +1135,19 @@ unsafe extern "system" fn ctl_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
                 CMD_QUIT => {
                     let _ = DestroyWindow(hwnd);
                 }
-                CMD_RECHECK => _ = with(|a| {
-                    a.update_winl();
-                    a.tray_update();
-                    if a.winl == WinL::Ready {
-                        a.balloon("Win+L now opens Charpick", "Lock the PC with Ctrl+Win+L or from the tray menu.", BalloonAction::None);
-                    }
-                }),
+                CMD_RECHECK => {
+                    _ = with(|a| {
+                        a.update_winl();
+                        a.tray_update();
+                        if a.winl == WinL::Ready {
+                            a.balloon(
+                                "Win+L now opens Charpick",
+                                "Lock the PC with Ctrl+Win+L or from the tray menu.",
+                                BalloonAction::None,
+                            );
+                        }
+                    })
+                }
                 CMD_DEMO => _ = with(|a| a.begin_show()),
                 CMD_SHORTCUT => _ = with(|a| a.record_shortcut()),
                 _ => _ = with(|a| a.greet(true)),
@@ -1134,7 +1173,10 @@ unsafe extern "system" fn ctl_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
             WM_WTSSESSION_CHANGE => {
                 diag!("ctl   session change {}", wp.0);
                 // Lock, disconnect or log off: Win+L must lock again from here on.
-                if matches!(wp.0 as u32, WTS_SESSION_LOCK | WTS_CONSOLE_DISCONNECT | WTS_REMOTE_DISCONNECT | WTS_SESSION_LOGOFF) {
+                if matches!(
+                    wp.0 as u32,
+                    WTS_SESSION_LOCK | WTS_CONSOLE_DISCONNECT | WTS_REMOTE_DISCONNECT | WTS_SESSION_LOGOFF
+                ) {
                     with(|a| a.hide());
                     disarm_policy(hwnd);
                 }
@@ -1257,7 +1299,7 @@ pub fn run(opts: Options) -> i32 {
     unsafe {
         let hinst: HINSTANCE = GetModuleHandleW(None).map(|m| m.into()).unwrap_or_default();
         let cursor = LoadCursorW(None, IDC_ARROW).unwrap_or_default();
-        let icon = LoadIconW(Some(hinst), PCWSTR(1 as *const u16)).unwrap_or_default();
+        let icon = LoadIconW(Some(hinst), PCWSTR(std::ptr::without_provenance(1))).unwrap_or_default();
         let ctl_class = WNDCLASSEXW {
             cbSize: std::mem::size_of::<WNDCLASSEXW>() as u32,
             lpfnWndProc: Some(ctl_proc),
@@ -1278,8 +1320,20 @@ pub fn run(opts: Options) -> i32 {
         RegisterClassExW(&ctl_class);
         RegisterClassExW(&picker_class);
 
-        let Ok(ctl) = CreateWindowExW(WS_EX_TOOLWINDOW, CONTROLLER_CLASS, w!("Charpick"), WS_POPUP, 0, 0, 0, 0, None, None, Some(hinst), None)
-        else {
+        let Ok(ctl) = CreateWindowExW(
+            WS_EX_TOOLWINDOW,
+            CONTROLLER_CLASS,
+            w!("Charpick"),
+            WS_POPUP,
+            0,
+            0,
+            0,
+            0,
+            None,
+            None,
+            Some(hinst),
+            None,
+        ) else {
             util::error_box(None, "Charpick could not start (controller window).");
             return 1;
         };

@@ -94,7 +94,10 @@ fn run() -> i32 {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let arg = |name: &str| args.iter().any(|a| a.eq_ignore_ascii_case(name));
     let value = |name: &str| {
-        args.iter().position(|a| a.eq_ignore_ascii_case(name)).and_then(|i| args.get(i + 1)).map(|v| v.to_ascii_lowercase())
+        args.iter()
+            .position(|a| a.eq_ignore_ascii_case(name))
+            .and_then(|i| args.get(i + 1))
+            .map(|v| v.to_ascii_lowercase())
     };
 
     let opts = Options {
@@ -138,7 +141,10 @@ fn run() -> i32 {
 fn run_windows(args: &[String], opts: Options) -> i32 {
     let arg = |name: &str| args.iter().any(|a| a.eq_ignore_ascii_case(name));
     let value = |name: &str| {
-        args.iter().position(|a| a.eq_ignore_ascii_case(name)).and_then(|i| args.get(i + 1)).map(|v| v.to_ascii_lowercase())
+        args.iter()
+            .position(|a| a.eq_ignore_ascii_case(name))
+            .and_then(|i| args.get(i + 1))
+            .map(|v| v.to_ascii_lowercase())
     };
 
     // Elevated helper started by `lockpolicy::run_elevated` or the installer.
@@ -305,7 +311,10 @@ fn snapshot(path: &str, opts: &Options, value: &dyn Fn(&str) -> Option<String>) 
         p.set_hover_cell(i);
     }
     if flag("--prompt") {
-        p.prompt = Some(picker::Prompt::record_shortcut(&s.hotkey, settings::Hotkey { vk: 0, mods: settings::MOD_CTRL | settings::MOD_ALT }));
+        p.prompt = Some(picker::Prompt::record_shortcut(
+            &s.hotkey,
+            settings::Hotkey { vk: 0, mods: settings::MOD_CTRL | settings::MOD_ALT },
+        ));
     }
 
     #[cfg(windows)]

@@ -15,19 +15,22 @@ use std::ffi::c_void;
 
 use windows::Win32::Foundation::{CloseHandle, ERROR_CANCELLED, ERROR_SUCCESS, HANDLE, HLOCAL, LocalFree};
 use windows::Win32::Security::Authorization::{
-    ConvertSidToStringSidW, ConvertStringSidToSidW, EXPLICIT_ACCESS_W, GRANT_ACCESS, GetSecurityInfo, NO_MULTIPLE_TRUSTEE,
-    REVOKE_ACCESS, SE_REGISTRY_KEY, SetEntriesInAclW, SetSecurityInfo, TRUSTEE_IS_SID, TRUSTEE_IS_USER, TRUSTEE_W,
+    ConvertSidToStringSidW, ConvertStringSidToSidW, EXPLICIT_ACCESS_W, GRANT_ACCESS, GetSecurityInfo,
+    NO_MULTIPLE_TRUSTEE, REVOKE_ACCESS, SE_REGISTRY_KEY, SetEntriesInAclW, SetSecurityInfo, TRUSTEE_IS_SID,
+    TRUSTEE_IS_USER, TRUSTEE_W,
 };
 use windows::Win32::Security::{
-    ACL, DACL_SECURITY_INFORMATION, GetTokenInformation, NO_INHERITANCE, PSECURITY_DESCRIPTOR, PSID, TOKEN_QUERY, TOKEN_USER,
-    TokenUser,
+    ACL, DACL_SECURITY_INFORMATION, GetTokenInformation, NO_INHERITANCE, PSECURITY_DESCRIPTOR, PSID, TOKEN_QUERY,
+    TOKEN_USER, TokenUser,
 };
 use windows::Win32::System::Registry::{
-    HKEY, HKEY_CURRENT_USER, HKEY_USERS, KEY_QUERY_VALUE, KEY_READ, KEY_SET_VALUE, REG_OPTION_NON_VOLATILE, REG_SAM_FLAGS,
-    RegCloseKey, RegCreateKeyExW, RegOpenKeyExW,
+    HKEY, HKEY_CURRENT_USER, HKEY_USERS, KEY_QUERY_VALUE, KEY_READ, KEY_SET_VALUE, REG_OPTION_NON_VOLATILE,
+    REG_SAM_FLAGS, RegCloseKey, RegCreateKeyExW, RegOpenKeyExW,
 };
 use windows::Win32::System::Shutdown::LockWorkStation;
-use windows::Win32::System::Threading::{GetCurrentProcess, GetExitCodeProcess, INFINITE, OpenProcessToken, WaitForSingleObject};
+use windows::Win32::System::Threading::{
+    GetCurrentProcess, GetExitCodeProcess, INFINITE, OpenProcessToken, WaitForSingleObject,
+};
 use windows::Win32::UI::Shell::{SEE_MASK_NOCLOSEPROCESS, SHELLEXECUTEINFOW, ShellExecuteExW};
 use windows::Win32::UI::WindowsAndMessaging::SW_HIDE;
 use windows_core::{PWSTR, w};
@@ -154,7 +157,16 @@ pub fn grant(sid: &str, revoke: bool) -> Result<(), String> {
             let handle = HANDLE(key.0);
             let mut old: *mut ACL = std::ptr::null_mut();
             let mut sd = PSECURITY_DESCRIPTOR::default();
-            let r = GetSecurityInfo(handle, SE_REGISTRY_KEY, DACL_SECURITY_INFORMATION, None, None, Some(&mut old), None, Some(&mut sd));
+            let r = GetSecurityInfo(
+                handle,
+                SE_REGISTRY_KEY,
+                DACL_SECURITY_INFORMATION,
+                None,
+                None,
+                Some(&mut old),
+                None,
+                Some(&mut sd),
+            );
             if r != ERROR_SUCCESS {
                 let _ = RegCloseKey(key);
                 return Err(format!("reading permissions failed ({})", r.0));
@@ -176,7 +188,8 @@ pub fn grant(sid: &str, revoke: bool) -> Result<(), String> {
             let out = if r != ERROR_SUCCESS {
                 Err(format!("building permissions failed ({})", r.0))
             } else {
-                let r = SetSecurityInfo(handle, SE_REGISTRY_KEY, DACL_SECURITY_INFORMATION, None, None, Some(new), None);
+                let r =
+                    SetSecurityInfo(handle, SE_REGISTRY_KEY, DACL_SECURITY_INFORMATION, None, None, Some(new), None);
                 LocalFree(Some(HLOCAL(new as *mut c_void)));
                 if r == ERROR_SUCCESS { Ok(()) } else { Err(format!("writing permissions failed ({})", r.0)) }
             };
@@ -211,7 +224,11 @@ pub fn run_elevated(revoke: bool) -> Elevation {
     };
     unsafe {
         if let Err(e) = ShellExecuteExW(&mut info) {
-            return if e.code() == ERROR_CANCELLED.to_hresult() { Elevation::Cancelled } else { Elevation::Failed(e.message()) };
+            return if e.code() == ERROR_CANCELLED.to_hresult() {
+                Elevation::Cancelled
+            } else {
+                Elevation::Failed(e.message())
+            };
         }
         if info.hProcess.is_invalid() {
             return Elevation::Failed("no process".into());

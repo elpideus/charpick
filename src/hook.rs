@@ -10,16 +10,18 @@ use std::sync::atomic::{AtomicBool, AtomicI32, AtomicIsize, AtomicU32, Ordering:
 
 use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, POINT, RECT, WPARAM};
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
-use windows::Win32::System::Threading::{GetCurrentThread, GetCurrentThreadId, SetThreadPriority, THREAD_PRIORITY_HIGHEST};
+use windows::Win32::System::Threading::{
+    GetCurrentThread, GetCurrentThreadId, SetThreadPriority, THREAD_PRIORITY_HIGHEST,
+};
 use windows::Win32::UI::Input::KeyboardAndMouse::{
     GetAsyncKeyState, GetKeyState, GetKeyboardLayout, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBD_EVENT_FLAGS, KEYBDINPUT,
     KEYEVENTF_KEYUP, KEYEVENTF_UNICODE, SendInput, ToUnicodeEx, VIRTUAL_KEY,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     CallNextHookEx, DispatchMessageW, GetForegroundWindow, GetMessageW, GetWindowThreadProcessId, HC_ACTION, HHOOK,
-    KBDLLHOOKSTRUCT, LLKHF_INJECTED, MSG, MSLLHOOKSTRUCT, PostMessageW, SetWindowsHookExW, TranslateMessage, UnhookWindowsHookEx,
-    WH_KEYBOARD_LL, WH_MOUSE_LL, WM_APP, WM_KEYDOWN, WM_LBUTTONDOWN, WM_MBUTTONDOWN, WM_MOUSEHWHEEL, WM_MOUSEWHEEL,
-    WM_NCLBUTTONDOWN, WM_NCRBUTTONDOWN, WM_RBUTTONDOWN, WM_SYSKEYDOWN, WM_XBUTTONDOWN,
+    KBDLLHOOKSTRUCT, LLKHF_INJECTED, MSG, MSLLHOOKSTRUCT, PostMessageW, SetWindowsHookExW, TranslateMessage,
+    UnhookWindowsHookEx, WH_KEYBOARD_LL, WH_MOUSE_LL, WM_APP, WM_KEYDOWN, WM_LBUTTONDOWN, WM_MBUTTONDOWN,
+    WM_MOUSEHWHEEL, WM_MOUSEWHEEL, WM_NCLBUTTONDOWN, WM_NCRBUTTONDOWN, WM_RBUTTONDOWN, WM_SYSKEYDOWN, WM_XBUTTONDOWN,
 };
 
 use crate::diag::{self, diag};
@@ -173,9 +175,12 @@ fn seen_win(st: &State, time: u32) -> u8 {
 /// right for a modifier event the hook is looking at right now.
 fn held_mods(st: &State, time: u32) -> u8 {
     let mut m = 0;
-    for (left, right, bit) in
-        [(VK_LCONTROL, VK_RCONTROL, MOD_CTRL), (VK_LMENU, VK_RMENU, MOD_ALT), (VK_LSHIFT, VK_RSHIFT, MOD_SHIFT), (VK_LWIN, VK_RWIN, MOD_WIN)]
-    {
+    for (left, right, bit) in [
+        (VK_LCONTROL, VK_RCONTROL, MOD_CTRL),
+        (VK_LMENU, VK_RMENU, MOD_ALT),
+        (VK_LSHIFT, VK_RSHIFT, MOD_SHIFT),
+        (VK_LWIN, VK_RWIN, MOD_WIN),
+    ] {
         if held(st, left, time) || held(st, right, time) {
             m |= bit;
         }
@@ -196,7 +201,9 @@ fn modifier_bit(vk: u32) -> u8 {
 fn key_input(vk: u16, scan: u16, flags: KEYBD_EVENT_FLAGS) -> INPUT {
     INPUT {
         r#type: INPUT_KEYBOARD,
-        Anonymous: INPUT_0 { ki: KEYBDINPUT { wVk: VIRTUAL_KEY(vk), wScan: scan, dwFlags: flags, time: 0, dwExtraInfo: MAGIC } },
+        Anonymous: INPUT_0 {
+            ki: KEYBDINPUT { wVk: VIRTUAL_KEY(vk), wScan: scan, dwFlags: flags, time: 0, dwExtraInfo: MAGIC },
+        },
     }
 }
 
@@ -363,7 +370,11 @@ fn on_key(k: &KBDLLHOOKSTRUCT, msg: u32, st: &mut State) -> bool {
         if repeat {
             return true;
         }
-        diag!("hook  shortcut: {}{}", if visible { "close" } else { "open" }, if win_held_back { " (Win held back)" } else { "" });
+        diag!(
+            "hook  shortcut: {}{}",
+            if visible { "close" } else { "open" },
+            if win_held_back { " (Win held back)" } else { "" }
+        );
         // When another program holds Win back, let L go on so that it sends Win now.
         // Windows then sees Win+L, which the lock policy turns into nothing. Keeping
         // the L could leave Win held back until release, and that program may then
@@ -420,8 +431,8 @@ fn on_key(k: &KBDLLHOOKSTRUCT, msg: u32, st: &mut State) -> bool {
         flags |= KEY_CTRL;
     }
     match vk {
-        VK_UP | VK_DOWN | VK_LEFT | VK_RIGHT | VK_HOME | VK_END | VK_PRIOR | VK_NEXT | VK_TAB | VK_RETURN | VK_ESCAPE
-        | VK_BACK | VK_DELETE => {
+        VK_UP | VK_DOWN | VK_LEFT | VK_RIGHT | VK_HOME | VK_END | VK_PRIOR | VK_NEXT | VK_TAB | VK_RETURN
+        | VK_ESCAPE | VK_BACK | VK_DELETE => {
             st.swallow_up[vk as usize] = true;
             post(WM_HK_KEY, vk as usize, flags);
             return true;
@@ -512,7 +523,12 @@ unsafe extern "system" fn keyboard_proc(code: i32, wp: WPARAM, lp: LPARAM) -> LR
 unsafe extern "system" fn mouse_proc(code: i32, wp: WPARAM, lp: LPARAM) -> LRESULT {
     if code == HC_ACTION as i32 && VISIBLE.load(Relaxed) {
         let m = unsafe { &*(lp.0 as *const MSLLHOOKSTRUCT) };
-        let r = RECT { left: RECT_L.load(Relaxed), top: RECT_T.load(Relaxed), right: RECT_R.load(Relaxed), bottom: RECT_B.load(Relaxed) };
+        let r = RECT {
+            left: RECT_L.load(Relaxed),
+            top: RECT_T.load(Relaxed),
+            right: RECT_R.load(Relaxed),
+            bottom: RECT_B.load(Relaxed),
+        };
         let inside = crate::util::rect_contains(&r, m.pt.x, m.pt.y);
         match wp.0 as u32 {
             WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN | WM_XBUTTONDOWN | WM_NCLBUTTONDOWN | WM_NCRBUTTONDOWN => {
@@ -625,7 +641,12 @@ mod tests {
     use super::*;
 
     fn state() -> State {
-        State { swallow_up: vec![false; 256], seen_down: vec![false; 256], down_time: vec![0; 256], ..Default::default() }
+        State {
+            swallow_up: vec![false; 256],
+            seen_down: vec![false; 256],
+            down_time: vec![0; 256],
+            ..Default::default()
+        }
     }
 
     #[test]

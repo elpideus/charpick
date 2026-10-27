@@ -4,22 +4,28 @@
 //! process and can be slow or hang in a misbehaving app. The result is posted
 //! back to the controller window.
 
+use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 use std::sync::mpsc::{Sender, channel};
-use std::sync::Arc;
 
 use windows::Win32::Foundation::{HWND, LPARAM, POINT, RECT, WPARAM};
 use windows::Win32::Graphics::Gdi::{ClientToScreen, MONITOR_DEFAULTTONEAREST, MonitorFromPoint};
-use windows::Win32::System::Com::{CLSCTX_INPROC_SERVER, COINIT_MULTITHREADED, CoCreateInstance, CoInitializeEx, SAFEARRAY};
-use windows::Win32::System::Ole::{SafeArrayAccessData, SafeArrayDestroy, SafeArrayGetLBound, SafeArrayGetUBound, SafeArrayUnaccessData};
+use windows::Win32::System::Com::{
+    CLSCTX_INPROC_SERVER, COINIT_MULTITHREADED, CoCreateInstance, CoInitializeEx, SAFEARRAY,
+};
+use windows::Win32::System::Ole::{
+    SafeArrayAccessData, SafeArrayDestroy, SafeArrayGetLBound, SafeArrayGetUBound, SafeArrayUnaccessData,
+};
 use windows::Win32::System::Variant::{VARIANT, VARIANT_0, VARIANT_0_0, VARIANT_0_0_0, VT_I4};
 use windows::Win32::UI::Accessibility::{
     AccessibleObjectFromWindow, CUIAutomation, IAccessible, IUIAutomation, IUIAutomation2, IUIAutomationTextPattern,
-    IUIAutomationTextPattern2, IUIAutomationTextRange, TextPatternRangeEndpoint_Start, TextUnit_Character, UIA_TextPattern2Id,
-    UIA_TextPatternId,
+    IUIAutomationTextPattern2, IUIAutomationTextRange, TextPatternRangeEndpoint_Start, TextUnit_Character,
+    UIA_TextPattern2Id, UIA_TextPatternId,
 };
 use windows::Win32::UI::HiDpi::{GetDpiForMonitor, GetDpiForWindow, MDT_EFFECTIVE_DPI};
-use windows::Win32::UI::WindowsAndMessaging::{GUITHREADINFO, GetGUIThreadInfo, GetWindowThreadProcessId, OBJID_CARET, PostMessageW};
+use windows::Win32::UI::WindowsAndMessaging::{
+    GUITHREADINFO, GetGUIThreadInfo, GetWindowThreadProcessId, OBJID_CARET, PostMessageW,
+};
 use windows_core::Interface;
 
 pub const WM_CARET: u32 = windows::Win32::UI::WindowsAndMessaging::WM_APP + 20;
@@ -62,10 +68,10 @@ impl CaretWorker {
                     let boxed = info.map(|i| Box::into_raw(Box::new(i)));
                     let lp = boxed.map_or(0, |p| p as isize);
                     unsafe {
-                        if PostMessageW(Some(HWND(notify as *mut _)), WM_CARET, WPARAM(req.id), LPARAM(lp)).is_err() {
-                            if let Some(p) = boxed {
-                                drop(Box::from_raw(p));
-                            }
+                        if PostMessageW(Some(HWND(notify as *mut _)), WM_CARET, WPARAM(req.id), LPARAM(lp)).is_err()
+                            && let Some(p) = boxed
+                        {
+                            drop(Box::from_raw(p));
                         }
                     }
                 }
@@ -128,10 +134,10 @@ fn find_caret(fg: HWND, uia: &mut Option<IUIAutomation>) -> Option<CaretInfo> {
                 let _ = a.SetTransactionTimeout(400);
             }
         }
-        if let Some(a) = uia.as_ref() {
-            if let Some(r) = uia_caret(a) {
-                return Some(CaretInfo { rect: r });
-            }
+        if let Some(a) = uia.as_ref()
+            && let Some(r) = uia_caret(a)
+        {
+            return Some(CaretInfo { rect: r });
         }
     }
     None
@@ -149,7 +155,12 @@ unsafe fn client_rect_to_screen(hwnd: HWND, rc: RECT) -> RECT {
         let wdpi = GetDpiForWindow(hwnd).max(96);
         let s = dx as f32 / wdpi as f32;
         let f = |v: i32| (v as f32 * s).round() as i32;
-        RECT { left: origin.x + f(rc.left), top: origin.y + f(rc.top), right: origin.x + f(rc.right), bottom: origin.y + f(rc.bottom) }
+        RECT {
+            left: origin.x + f(rc.left),
+            top: origin.y + f(rc.top),
+            right: origin.x + f(rc.right),
+            bottom: origin.y + f(rc.bottom),
+        }
     }
 }
 
@@ -194,7 +205,12 @@ unsafe fn rects_of(range: &IUIAutomationTextRange) -> Option<RECT> {
             let base = (n / 4 - 1) * 4;
             let (x, y, w, h) = (v[base], v[base + 1], v[base + 2], v[base + 3]);
             if h > 0.0 {
-                out = Some(RECT { left: x as i32, top: y as i32, right: (x + w.max(1.0)) as i32, bottom: (y + h) as i32 });
+                out = Some(RECT {
+                    left: x as i32,
+                    top: y as i32,
+                    right: (x + w.max(1.0)) as i32,
+                    bottom: (y + h) as i32,
+                });
             }
             let _ = SafeArrayUnaccessData(sa);
         }
@@ -210,11 +226,11 @@ unsafe fn degenerate_caret(range: &IUIAutomationTextRange) -> Option<RECT> {
             return Some(r);
         }
         let probe = range.Clone().ok()?;
-        if probe.MoveEndpointByUnit(TextPatternRangeEndpoint_Start, TextUnit_Character, -1).ok()? != 0 {
-            if let Some(r) = rects_of(&probe) {
-                // The caret sits after that character.
-                return Some(RECT { left: r.right, top: r.top, right: r.right + 1, bottom: r.bottom });
-            }
+        if probe.MoveEndpointByUnit(TextPatternRangeEndpoint_Start, TextUnit_Character, -1).ok()? != 0
+            && let Some(r) = rects_of(&probe)
+        {
+            // The caret sits after that character.
+            return Some(RECT { left: r.right, top: r.top, right: r.right + 1, bottom: r.bottom });
         }
         let probe = range.Clone().ok()?;
         probe.ExpandToEnclosingUnit(TextUnit_Character).ok()?;
@@ -227,27 +243,29 @@ unsafe fn uia_caret(uia: &IUIAutomation) -> Option<RECT> {
         let el = uia.GetFocusedElement().ok()?;
         if let Ok(p) = el.GetCurrentPatternAs::<IUIAutomationTextPattern2>(UIA_TextPattern2Id) {
             let mut active = windows_core::BOOL(0);
-            if let Ok(range) = p.GetCaretRange(&mut active) {
-                if let Some(r) = degenerate_caret(&range) {
-                    return Some(r);
-                }
+            if let Ok(range) = p.GetCaretRange(&mut active)
+                && let Some(r) = degenerate_caret(&range)
+            {
+                return Some(r);
             }
         }
-        if let Ok(p) = el.GetCurrentPatternAs::<IUIAutomationTextPattern>(UIA_TextPatternId) {
-            if let Ok(sel) = p.GetSelection() {
-                if sel.Length().unwrap_or(0) > 0 {
-                    if let Ok(range) = sel.GetElement(0) {
-                        if let Some(r) = degenerate_caret(&range) {
-                            return Some(r);
-                        }
-                    }
-                }
-            }
+        if let Ok(p) = el.GetCurrentPatternAs::<IUIAutomationTextPattern>(UIA_TextPatternId)
+            && let Ok(sel) = p.GetSelection()
+            && sel.Length().unwrap_or(0) > 0
+            && let Ok(range) = sel.GetElement(0)
+            && let Some(r) = degenerate_caret(&range)
+        {
+            return Some(r);
         }
         // A focused element without text support (a search box in a custom UI):
         // anchor at its bottom-left corner when it is reasonably small.
         let r = el.CurrentBoundingRectangle().ok()?;
         let (w, h) = (r.right - r.left, r.bottom - r.top);
-        (w > 0 && h > 0 && h < 120 && w < 2000).then(|| RECT { left: r.left + 4, top: r.top, right: r.left + 5, bottom: r.bottom })
+        (w > 0 && h > 0 && h < 120 && w < 2000).then(|| RECT {
+            left: r.left + 4,
+            top: r.top,
+            right: r.left + 5,
+            bottom: r.bottom,
+        })
     }
 }

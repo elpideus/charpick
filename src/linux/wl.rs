@@ -170,7 +170,14 @@ macro_rules! no_events {
 no_events!(OrgKdeKwinFakeInput, WpFractionalScaleManagerV1, WpViewporter, WpViewport, ExtDataControlManagerV1);
 
 impl Dispatch2<WpFractionalScaleV1, State> for Plain {
-    fn event(&self, st: &mut State, _: &WpFractionalScaleV1, ev: wp_fractional_scale_v1::Event, _: &Connection, _: &QueueHandle<State>) {
+    fn event(
+        &self,
+        st: &mut State,
+        _: &WpFractionalScaleV1,
+        ev: wp_fractional_scale_v1::Event,
+        _: &Connection,
+        _: &QueueHandle<State>,
+    ) {
         if let wp_fractional_scale_v1::Event::PreferredScale { scale } = ev {
             st.set_scale(scale);
         }
@@ -181,7 +188,14 @@ impl Dispatch2<WpFractionalScaleV1, State> for Plain {
 struct ClipSource(String);
 
 impl Dispatch2<ExtDataControlSourceV1, State> for ClipSource {
-    fn event(&self, _: &mut State, src: &ExtDataControlSourceV1, ev: ext_data_control_source_v1::Event, _: &Connection, _: &QueueHandle<State>) {
+    fn event(
+        &self,
+        _: &mut State,
+        src: &ExtDataControlSourceV1,
+        ev: ext_data_control_source_v1::Event,
+        _: &Connection,
+        _: &QueueHandle<State>,
+    ) {
         match ev {
             ext_data_control_source_v1::Event::Send { fd, .. } => {
                 let _ = std::fs::File::from(fd).write_all(self.0.as_bytes());
@@ -195,7 +209,14 @@ impl Dispatch2<ExtDataControlSourceV1, State> for ClipSource {
 struct ClipDevice;
 
 impl Dispatch2<ExtDataControlDeviceV1, State> for ClipDevice {
-    fn event(&self, _: &mut State, dev: &ExtDataControlDeviceV1, ev: ext_data_control_device_v1::Event, _: &Connection, _: &QueueHandle<State>) {
+    fn event(
+        &self,
+        _: &mut State,
+        dev: &ExtDataControlDeviceV1,
+        ev: ext_data_control_device_v1::Event,
+        _: &Connection,
+        _: &QueueHandle<State>,
+    ) {
         match ev {
             // Charpick only writes the clipboard.
             ext_data_control_device_v1::Event::Selection { id: Some(offer) }
@@ -205,14 +226,25 @@ impl Dispatch2<ExtDataControlDeviceV1, State> for ClipDevice {
         }
     }
 
-    fn event_created_child(opcode: u16, qh: &QueueHandle<State>) -> std::sync::Arc<dyn wayland_client::backend::ObjectData> {
+    fn event_created_child(
+        opcode: u16,
+        qh: &QueueHandle<State>,
+    ) -> std::sync::Arc<dyn wayland_client::backend::ObjectData> {
         assert_eq!(opcode, ext_data_control_device_v1::EVT_DATA_OFFER_OPCODE);
         qh.make_data::<ExtDataControlOfferV1, _>(Plain)
     }
 }
 
 impl Dispatch2<ExtDataControlOfferV1, State> for Plain {
-    fn event(&self, _: &mut State, _: &ExtDataControlOfferV1, _: ext_data_control_offer_v1::Event, _: &Connection, _: &QueueHandle<State>) {}
+    fn event(
+        &self,
+        _: &mut State,
+        _: &ExtDataControlOfferV1,
+        _: ext_data_control_offer_v1::Event,
+        _: &Connection,
+        _: &QueueHandle<State>,
+    ) {
+    }
 }
 
 fn stop(handle: &LoopHandle<'static, State>, t: &mut Option<RegistrationToken>) {
@@ -344,7 +376,13 @@ pub fn connect(opts: Options) -> Result<(EventLoop<'static, State>, State), Stri
     };
     // Seats, outputs and the compositor's blur support.
     queue.roundtrip(&mut state).map_err(|e| e.to_string())?;
-    state.last_scale120 = state.outputs.outputs().filter_map(|o| state.outputs.info(&o)).map(|i| i.scale_factor.max(1) as u32 * 120).max().unwrap_or(120);
+    state.last_scale120 = state
+        .outputs
+        .outputs()
+        .filter_map(|o| state.outputs.info(&o))
+        .map(|i| i.scale_factor.max(1) as u32 * 120)
+        .max()
+        .unwrap_or(120);
     state.apply_settings();
     log!(
         "wl    fake input: {}, blur: {}, fractional scale: {}, clipboard: {}",
@@ -420,33 +458,40 @@ impl State {
         }
         self.refresh();
         let n = self.settings.recent_count;
-        self.picker.recent = self.recent.items.iter().filter_map(|k| self.picker.catalog.entry_by_text(k)).take(n).collect();
+        self.picker.recent =
+            self.recent.items.iter().filter_map(|k| self.picker.catalog.entry_by_text(k)).take(n).collect();
         self.picker.reset();
         self.picker.upper = self.upper();
         self.picker.caret_on = true;
         self.picker.prompt = None;
         if recorder {
             self.picker.record_start(self.settings.hotkey);
-            if let Some(label) = &self.kde_label {
-                if let Some(p) = &mut self.picker.prompt {
-                    p.hint = format!("Current shortcut: {label}");
-                }
+            if let Some(label) = &self.kde_label
+                && let Some(p) = &mut self.picker.prompt
+            {
+                p.hint = format!("Current shortcut: {label}");
             }
         }
 
         let surface = self.compositor.create_surface(&self.qh);
         let (viewport, fractional) = match (&self.viewporter, &self.fractional) {
-            (Some(vp), Some(fs)) => {
-                (Some(vp.get_viewport(&surface, &self.qh, Plain)), Some(fs.get_fractional_scale(&surface, &self.qh, Plain)))
-            }
+            (Some(vp), Some(fs)) => (
+                Some(vp.get_viewport(&surface, &self.qh, Plain)),
+                Some(fs.get_fractional_scale(&surface, &self.qh, Plain)),
+            ),
             _ => (None, None),
         };
-        let effect = if self.blur_supported() { self.effects.get_background_effect(&surface, &self.qh).ok() } else { None };
+        let effect =
+            if self.blur_supported() { self.effects.get_background_effect(&surface, &self.qh).ok() } else { None };
         let layer = self.layer_shell.create_layer_surface(&self.qh, surface, Layer::Overlay, Some("charpick"), None);
         let size = paint::logical_size(&self.picker);
         layer.set_size(size.0 as u32, size.1 as u32);
         let exclusive = recorder;
-        layer.set_keyboard_interactivity(if exclusive { KeyboardInteractivity::Exclusive } else { KeyboardInteractivity::OnDemand });
+        layer.set_keyboard_interactivity(if exclusive {
+            KeyboardInteractivity::Exclusive
+        } else {
+            KeyboardInteractivity::OnDemand
+        });
         layer.commit();
         self.win = Some(Window {
             layer,
@@ -479,13 +524,14 @@ impl State {
             .handle
             .insert_source(Timer::from_duration(FOCUS_WAIT), |_, _, st| {
                 st.timers.focus = None;
-                if let Some(w) = &mut st.win {
-                    if !w.focused && !w.exclusive {
-                        log!("wl    no keyboard focus yet, asking for it");
-                        w.exclusive = true;
-                        w.layer.set_keyboard_interactivity(KeyboardInteractivity::Exclusive);
-                        w.layer.commit();
-                    }
+                if let Some(w) = &mut st.win
+                    && !w.focused
+                    && !w.exclusive
+                {
+                    log!("wl    no keyboard focus yet, asking for it");
+                    w.exclusive = true;
+                    w.layer.set_keyboard_interactivity(KeyboardInteractivity::Exclusive);
+                    w.layer.commit();
                 }
                 TimeoutAction::Drop
             })
@@ -539,12 +585,12 @@ impl State {
     fn set_scale(&mut self, scale120: u32) {
         self.last_scale120 = scale120;
         self.picker.set_dpi(scale120 * 96 / 120);
-        if let Some(w) = &mut self.win {
-            if w.scale120 != scale120 {
-                w.scale120 = scale120;
-                w.shadow = None;
-                self.redraw();
-            }
+        if let Some(w) = &mut self.win
+            && w.scale120 != scale120
+        {
+            w.scale120 = scale120;
+            w.shadow = None;
+            self.redraw();
         }
     }
 
@@ -794,10 +840,10 @@ impl State {
         }
         let Some(vk) = vk_from_keysym(base) else {
             let mut keys = Hotkey { vk: 0, mods }.parts();
-            let name = base.key_char().filter(|c| !c.is_control()).map_or_else(
-                || xkb::keysym_get_name(base),
-                |c| c.to_uppercase().collect(),
-            );
+            let name = base
+                .key_char()
+                .filter(|c| !c.is_control())
+                .map_or_else(|| xkb::keysym_get_name(base), |c| c.to_uppercase().collect());
             keys.push(name);
             self.picker.record_warn(keys, "Use a letter, a digit, an F key or one of , . ; ' [ ] / \\ - = `");
             self.redraw();
@@ -823,10 +869,11 @@ impl State {
 impl CompositorHandler for State {
     fn scale_factor_changed(&mut self, _: &Connection, _: &QueueHandle<Self>, surface: &WlSurface, factor: i32) {
         // Only used without fractional scaling.
-        if let Some(w) = &self.win {
-            if w.viewport.is_none() && w.layer.wl_surface() == surface {
-                self.set_scale(factor.max(1) as u32 * 120);
-            }
+        if let Some(w) = &self.win
+            && w.viewport.is_none()
+            && w.layer.wl_surface() == surface
+        {
+            self.set_scale(factor.max(1) as u32 * 120);
         }
     }
 
@@ -869,7 +916,14 @@ impl LayerShellHandler for State {
         self.hide();
     }
 
-    fn configure(&mut self, _: &Connection, _: &QueueHandle<Self>, layer: &LayerSurface, _: LayerSurfaceConfigure, _: u32) {
+    fn configure(
+        &mut self,
+        _: &Connection,
+        _: &QueueHandle<Self>,
+        layer: &LayerSurface,
+        _: LayerSurfaceConfigure,
+        _: u32,
+    ) {
         let Some(w) = &mut self.win else { return };
         if &w.layer != layer {
             return;
@@ -901,19 +955,20 @@ impl SeatHandler for State {
             let repeat = Box::new(|st: &mut State, _: &WlKeyboard, ev: KeyEvent| st.on_key(ev, true));
             self.keyboard = self.seats.get_keyboard_with_repeat(qh, &seat, None, self.handle.clone(), repeat).ok();
         }
-        if cap == Capability::Pointer && self.pointer.is_none() {
-            if let Ok(p) = self.seats.get_pointer(qh, &seat) {
-                self.cursor = self.cursor_shapes.as_ref().map(|c| c.get_shape_device(&p, qh));
-                self.pointer = Some(p);
-            }
+        if cap == Capability::Pointer
+            && self.pointer.is_none()
+            && let Ok(p) = self.seats.get_pointer(qh, &seat)
+        {
+            self.cursor = self.cursor_shapes.as_ref().map(|c| c.get_shape_device(&p, qh));
+            self.pointer = Some(p);
         }
     }
 
     fn remove_capability(&mut self, _: &Connection, _: &QueueHandle<Self>, _: WlSeat, cap: Capability) {
-        if cap == Capability::Keyboard {
-            if let Some(k) = self.keyboard.take() {
-                k.release();
-            }
+        if cap == Capability::Keyboard
+            && let Some(k) = self.keyboard.take()
+        {
+            k.release();
         }
         if cap == Capability::Pointer {
             if let Some(c) = self.cursor.take() {
@@ -929,7 +984,16 @@ impl SeatHandler for State {
 }
 
 impl KeyboardHandler for State {
-    fn enter(&mut self, _: &Connection, _: &QueueHandle<Self>, _: &WlKeyboard, surface: &WlSurface, _: u32, raw: &[u32], _: &[Keysym]) {
+    fn enter(
+        &mut self,
+        _: &Connection,
+        _: &QueueHandle<Self>,
+        _: &WlKeyboard,
+        surface: &WlSurface,
+        _: u32,
+        raw: &[u32],
+        _: &[Keysym],
+    ) {
         let Some(w) = &mut self.win else { return };
         if w.layer.wl_surface() == surface {
             w.focused = true;
@@ -970,7 +1034,16 @@ impl KeyboardHandler for State {
         }
     }
 
-    fn update_modifiers(&mut self, _: &Connection, _: &QueueHandle<Self>, _: &WlKeyboard, _: u32, mods: Modifiers, _: RawModifiers, layout: u32) {
+    fn update_modifiers(
+        &mut self,
+        _: &Connection,
+        _: &QueueHandle<Self>,
+        _: &WlKeyboard,
+        _: u32,
+        mods: Modifiers,
+        _: RawModifiers,
+        layout: u32,
+    ) {
         self.mods = mods;
         self.layout = layout;
         if self.win.as_ref().is_none_or(|w| w.leaving.is_some()) {
@@ -988,8 +1061,12 @@ impl KeyboardHandler for State {
 
     fn update_keymap(&mut self, _: &Connection, _: &QueueHandle<Self>, _: &WlKeyboard, keymap: Keymap<'_>) {
         let ctx = xkb::Context::new(xkb::CONTEXT_NO_FLAGS);
-        self.keymap =
-            xkb::Keymap::new_from_string(&ctx, keymap.as_string(), xkb::KEYMAP_FORMAT_TEXT_V1, xkb::KEYMAP_COMPILE_NO_FLAGS);
+        self.keymap = xkb::Keymap::new_from_string(
+            &ctx,
+            keymap.as_string(),
+            xkb::KEYMAP_FORMAT_TEXT_V1,
+            xkb::KEYMAP_COMPILE_NO_FLAGS,
+        );
     }
 }
 

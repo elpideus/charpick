@@ -51,7 +51,8 @@ fn menu_shortcut(hk: Option<Hotkey>) -> Vec<Vec<String>> {
 }
 
 fn item(label: &str, cmd: fn() -> Cmd) -> MenuItem<Tray> {
-    StandardItem { label: label.into(), activate: Box::new(move |t: &mut Tray| t.send(cmd())), ..Default::default() }.into()
+    StandardItem { label: label.into(), activate: Box::new(move |t: &mut Tray| t.send(cmd())), ..Default::default() }
+        .into()
 }
 
 impl ksni::Tray for Tray {

@@ -223,7 +223,9 @@ impl Bus {
     pub fn listen(&self, tx: calloop::channel::Sender<Cmd>) {
         let conn = self.conn.clone();
         let rules = [
-            format!("type='signal',path='/component/{COMPONENT}',interface='org.kde.kglobalaccel.Component',member='globalShortcutPressed'"),
+            format!(
+                "type='signal',path='/component/{COMPONENT}',interface='org.kde.kglobalaccel.Component',member='globalShortcutPressed'"
+            ),
             format!("type='signal',path='{PATH}',interface='{IFACE}',member='yourShortcutsChanged'"),
             format!(
                 "type='signal',sender='org.freedesktop.DBus',interface='org.freedesktop.DBus',member='NameOwnerChanged',arg0='{SERVICE}'"
@@ -251,7 +253,10 @@ impl Bus {
                             _ => None,
                         },
                         "yourShortcutsChanged" => match body.deserialize::<(Vec<String>, Sequences)>() {
-                            Ok((id, seqs)) if id.first().map(String::as_str) == Some(COMPONENT) && id.get(1).map(String::as_str) == Some(ACTION) => {
+                            Ok((id, seqs))
+                                if id.first().map(String::as_str) == Some(COMPONENT)
+                                    && id.get(1).map(String::as_str) == Some(ACTION) =>
+                            {
                                 Some(Cmd::KdeShortcut(KdeShortcut(first_key(&seqs))))
                             }
                             _ => None,
@@ -263,10 +268,10 @@ impl Bus {
                         },
                         _ => None,
                     };
-                    if let Some(cmd) = cmd {
-                        if tx.send(cmd).is_err() {
-                            return;
-                        }
+                    if let Some(cmd) = cmd
+                        && tx.send(cmd).is_err()
+                    {
+                        return;
                     }
                 }
             });

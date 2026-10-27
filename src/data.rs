@@ -47,88 +47,106 @@ const fn sym(
 /// Default order: Italian first, Romanian second, then the big western European
 /// languages, then everything else, then symbols.
 pub static SECTIONS: &[SectionDef] = &[
-    lang("it", "IT", "Italiano", "Italian", "italia ita",
-        "à è é ì ò ù í î ó ú « » “ ” ’ ª º"),
-    lang("ro", "RO", "Română", "Romanian", "romania moldovan moldova rum ron",
-        "ă â î ș ț „ ” « » ş ţ"),
-    lang("de", "DE", "Deutsch", "German", "germany austria swiss ger deu",
-        "ä ö ü ß „ “ ‚ ‘ » « › ‹"),
-    lang("fr", "FR", "Français", "French", "france belgian quebec fra fre",
-        "à â æ ç é è ê ë î ï ô œ ù û ü ÿ « » ‹ › “ ” ’"),
-    lang("es", "ES", "Español", "Spanish", "castellano spain mexico latin spa",
-        "á é í ó ú ñ ü ¿ ¡ « » “ ” ª º"),
-    lang("pt", "PT", "Português", "Portuguese", "portugal brazil brasil brazilian por",
-        "á â ã à ç é ê í ó ô õ ú « » “ ” ª º"),
-    lang("ca", "CA", "Català", "Catalan", "valencian valencia cat",
-        "à è é í ï ò ó ú ü ç l·l · « »"),
-    lang("nl", "NL", "Nederlands", "Dutch", "flemish netherlands holland vlaams nld dut",
-        "á é í ó ú à è ë ï ö ü ĳ"),
-    lang("sv", "SV", "Svenska", "Swedish", "sweden swe",
-        "å ä ö é ” »"),
-    lang("no", "NO", "Norsk", "Norwegian", "norway bokmal bokmål nynorsk nb nn nor",
-        "æ ø å é è ê ó ò ô « »"),
-    lang("da", "DA", "Dansk", "Danish", "denmark dan",
-        "æ ø å é » «"),
-    lang("fi", "FI", "Suomi", "Finnish", "finland fin",
-        "ä ö å š ž ”"),
-    lang("is", "IS", "Íslenska", "Icelandic", "iceland faroese isl",
-        "á ð é í ó ú ý þ æ ö „ “"),
-    lang("pl", "PL", "Polski", "Polish", "poland pol",
-        "ą ć ę ł ń ó ś ź ż „ ” « »"),
-    lang("cs", "CS", "Čeština", "Czech", "czechia cesky ces cze cz",
-        "á č ď é ě í ň ó ř š ť ú ů ý ž „ “ ‚ ‘"),
-    lang("sk", "SK", "Slovenčina", "Slovak", "slovakia slovensky slk",
-        "á ä č ď é í ĺ ľ ň ó ô ŕ š ť ú ý ž „ “"),
-    lang("hu", "HU", "Magyar", "Hungarian", "hungary hun",
-        "á é í ó ö ő ú ü ű „ ” » «"),
-    lang("hr", "HR", "Hrvatski · Bosanski · Srpski", "Croatian, Bosnian, Serbian",
+    lang("it", "IT", "Italiano", "Italian", "italia ita", "à è é ì ò ù í î ó ú « » “ ” ’ ª º"),
+    lang("ro", "RO", "Română", "Romanian", "romania moldovan moldova rum ron", "ă â î ș ț „ ” « » ş ţ"),
+    lang("de", "DE", "Deutsch", "German", "germany austria swiss ger deu", "ä ö ü ß „ “ ‚ ‘ » « › ‹"),
+    lang(
+        "fr",
+        "FR",
+        "Français",
+        "French",
+        "france belgian quebec fra fre",
+        "à â æ ç é è ê ë î ï ô œ ù û ü ÿ « » ‹ › “ ” ’",
+    ),
+    lang("es", "ES", "Español", "Spanish", "castellano spain mexico latin spa", "á é í ó ú ñ ü ¿ ¡ « » “ ” ª º"),
+    lang(
+        "pt",
+        "PT",
+        "Português",
+        "Portuguese",
+        "portugal brazil brasil brazilian por",
+        "á â ã à ç é ê í ó ô õ ú « » “ ” ª º",
+    ),
+    lang("ca", "CA", "Català", "Catalan", "valencian valencia cat", "à è é í ï ò ó ú ü ç l·l · « »"),
+    lang("nl", "NL", "Nederlands", "Dutch", "flemish netherlands holland vlaams nld dut", "á é í ó ú à è ë ï ö ü ĳ"),
+    lang("sv", "SV", "Svenska", "Swedish", "sweden swe", "å ä ö é ” »"),
+    lang("no", "NO", "Norsk", "Norwegian", "norway bokmal bokmål nynorsk nb nn nor", "æ ø å é è ê ó ò ô « »"),
+    lang("da", "DA", "Dansk", "Danish", "denmark dan", "æ ø å é » «"),
+    lang("fi", "FI", "Suomi", "Finnish", "finland fin", "ä ö å š ž ”"),
+    lang("is", "IS", "Íslenska", "Icelandic", "iceland faroese isl", "á ð é í ó ú ý þ æ ö „ “"),
+    lang("pl", "PL", "Polski", "Polish", "poland pol", "ą ć ę ł ń ó ś ź ż „ ” « »"),
+    lang("cs", "CS", "Čeština", "Czech", "czechia cesky ces cze cz", "á č ď é ě í ň ó ř š ť ú ů ý ž „ “ ‚ ‘"),
+    lang("sk", "SK", "Slovenčina", "Slovak", "slovakia slovensky slk", "á ä č ď é í ĺ ľ ň ó ô ŕ š ť ú ý ž „ “"),
+    lang("hu", "HU", "Magyar", "Hungarian", "hungary hun", "á é í ó ö ő ú ü ű „ ” » «"),
+    lang(
+        "hr",
+        "HR",
+        "Hrvatski · Bosanski · Srpski",
+        "Croatian, Bosnian, Serbian",
         "croatia bosnia serbia montenegrin crnogorski latinica sr bs hrv srp bos",
-        "č ć đ š ž „ “ » «"),
-    lang("sl", "SL", "Slovenščina", "Slovenian", "slovene slovenia slv",
-        "č š ž ć đ „ “"),
-    lang("tr", "TR", "Türkçe", "Turkish", "turkey turkiye azerbaijani azeri tur",
-        "ç ğ ı i|İ ö ş ü â î û"),
-    lang("et", "ET", "Eesti", "Estonian", "estonia est",
-        "ä ö õ ü š ž „ “"),
-    lang("lv", "LV", "Latviešu", "Latvian", "latvia lettish lav",
-        "ā č ē ģ ī ķ ļ ņ š ū ž"),
-    lang("lt", "LT", "Lietuvių", "Lithuanian", "lithuania lit",
-        "ą č ę ė į š ų ū ž „ “"),
-    lang("sq", "SQ", "Shqip", "Albanian", "albania kosovo sqi alb",
-        "ç ë « »"),
-    lang("mt", "MT", "Malti", "Maltese", "malta mlt",
-        "ċ ġ għ ħ ż à è ì ò ù"),
-    lang("cy", "CY", "Cymraeg", "Welsh", "wales cym",
-        "â ê î ô û ŵ ŷ á é í ó ú ẃ ý ä ë ï ö ü ẅ ÿ"),
-    lang("ga", "GA", "Gaeilge", "Irish", "ireland gaelic scottish gle",
-        "á é í ó ú à è ì ò ù"),
-    lang("eo", "EO", "Esperanto", "Esperanto", "epo",
-        "ĉ ĝ ĥ ĵ ŝ ŭ"),
-    lang("vi", "VI", "Tiếng Việt", "Vietnamese", "vietnam vie",
+        "č ć đ š ž „ “ » «",
+    ),
+    lang("sl", "SL", "Slovenščina", "Slovenian", "slovene slovenia slv", "č š ž ć đ „ “"),
+    lang("tr", "TR", "Türkçe", "Turkish", "turkey turkiye azerbaijani azeri tur", "ç ğ ı i|İ ö ş ü â î û"),
+    lang("et", "ET", "Eesti", "Estonian", "estonia est", "ä ö õ ü š ž „ “"),
+    lang("lv", "LV", "Latviešu", "Latvian", "latvia lettish lav", "ā č ē ģ ī ķ ļ ņ š ū ž"),
+    lang("lt", "LT", "Lietuvių", "Lithuanian", "lithuania lit", "ą č ę ė į š ų ū ž „ “"),
+    lang("sq", "SQ", "Shqip", "Albanian", "albania kosovo sqi alb", "ç ë « »"),
+    lang("mt", "MT", "Malti", "Maltese", "malta mlt", "ċ ġ għ ħ ż à è ì ò ù"),
+    lang("cy", "CY", "Cymraeg", "Welsh", "wales cym", "â ê î ô û ŵ ŷ á é í ó ú ẃ ý ä ë ï ö ü ẅ ÿ"),
+    lang("ga", "GA", "Gaeilge", "Irish", "ireland gaelic scottish gle", "á é í ó ú à è ì ò ù"),
+    lang("eo", "EO", "Esperanto", "Esperanto", "epo", "ĉ ĝ ĥ ĵ ŝ ŭ"),
+    lang(
+        "vi",
+        "VI",
+        "Tiếng Việt",
+        "Vietnamese",
+        "vietnam vie",
         "ă â đ ê ô ơ ư \
          à á ả ã ạ ằ ắ ẳ ẵ ặ ầ ấ ẩ ẫ ậ \
          è é ẻ ẽ ẹ ề ế ể ễ ệ \
          ì í ỉ ĩ ị \
          ò ó ỏ õ ọ ồ ố ổ ỗ ộ ờ ớ ở ỡ ợ \
          ù ú ủ ũ ụ ừ ứ ử ữ ự \
-         ỳ ý ỷ ỹ ỵ"),
-    lang("el", "EL", "Ελληνικά", "Greek", "greece hellenic ellinika ell gre",
-        "α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ ς τ υ φ χ ψ ω ά έ ή ί ό ύ ώ ϊ ϋ « »"),
-    sym("punct", "“”", "Punctuation & quotes",
+         ỳ ý ỷ ỹ ỵ",
+    ),
+    lang(
+        "el",
+        "EL",
+        "Ελληνικά",
+        "Greek",
+        "greece hellenic ellinika ell gre",
+        "α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ ς τ υ φ χ ψ ω ά έ ή ί ό ύ ώ ϊ ϋ « »",
+    ),
+    sym(
+        "punct",
+        "“”",
+        "Punctuation & quotes",
         "punctuation quotes quotation marks dashes typography",
-        "– — … · • « » ‹ › “ ” „ ‘ ’ ‚ ¡ ¿ ′ ″ § ¶ † ‡ ‰ № ‽"),
-    sym("currency", "€", "Currency",
-        "currency money symbols",
-        "€ £ ¥ ¢ ₿ ₹ ₽ ₺ ₴ ₩ ₪ ₫ ₱ ₦ ₸ ₼ ₾ ₡ ₵ ฿ ¤"),
-    sym("math", "±", "Math",
+        "– — … · • « » ‹ › “ ” „ ‘ ’ ‚ ¡ ¿ ′ ″ § ¶ † ‡ ‰ № ‽",
+    ),
+    sym("currency", "€", "Currency", "currency money symbols", "€ £ ¥ ¢ ₿ ₹ ₽ ₺ ₴ ₩ ₪ ₫ ₱ ₦ ₸ ₼ ₾ ₡ ₵ ฿ ¤"),
+    sym(
+        "math",
+        "±",
+        "Math",
         "math maths mathematics operators logic sets",
-        "± × ÷ − ≠ ≈ ≡ ≤ ≥ ∞ √ ∑ ∏ ∫ ∂ ∆ ∇ ∈ ∉ ⊂ ⊃ ∪ ∩ ∀ ∃ ∅ ¬ ∧ ∨ ⇒ ⇔ ∝ ° µ π"),
-    sym("numbers", "½", "Fractions & superscripts",
+        "± × ÷ − ≠ ≈ ≡ ≤ ≥ ∞ √ ∑ ∏ ∫ ∂ ∆ ∇ ∈ ∉ ⊂ ⊃ ∪ ∩ ∀ ∃ ∅ ¬ ∧ ∨ ⇒ ⇔ ∝ ° µ π",
+    ),
+    sym(
+        "numbers",
+        "½",
+        "Fractions & superscripts",
         "numbers fractions superscripts subscripts powers indices",
-        "½ ⅓ ⅔ ¼ ¾ ⅛ ⅜ ⅝ ⅞ ⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁺ ⁻ ⁿ ₀ ₁ ₂ ₃ ₄ ₅ ₆ ₇ ₈ ₉"),
-    sym("misc", "→", "Arrows & signs",
+        "½ ⅓ ⅔ ¼ ¾ ⅛ ⅜ ⅝ ⅞ ⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁺ ⁻ ⁿ ₀ ₁ ₂ ₃ ₄ ₅ ₆ ₇ ₈ ₉",
+    ),
+    sym(
+        "misc",
+        "→",
+        "Arrows & signs",
         "arrows signs misc symbols marks",
-        "← → ↑ ↓ ↔ ↕ ⇐ ⇑ ⇓ ↵ ✓ ✗ ★ ☆ ♥ © ® ™ ℃ ℉ ♀ ♂ ♪ ⌘ ⌥ ⇧ ⌫"),
+        "← → ↑ ↓ ↔ ↕ ⇐ ⇑ ⇓ ↵ ✓ ✗ ★ ☆ ♥ © ® ™ ℃ ℉ ♀ ♂ ♪ ⌘ ⌥ ⇧ ⌫",
+    ),
 ];
 
 /// Names for characters that do not decompose into a base letter plus marks.
@@ -304,11 +322,30 @@ static NAMES: &[(&str, &str, &str)] = &[
 ];
 
 static GREEK: &[(char, &str)] = &[
-    ('α', "alpha"), ('β', "beta"), ('γ', "gamma"), ('δ', "delta"), ('ε', "epsilon"),
-    ('ζ', "zeta"), ('η', "eta"), ('θ', "theta"), ('ι', "iota"), ('κ', "kappa"),
-    ('λ', "lambda"), ('μ', "mu"), ('ν', "nu"), ('ξ', "xi"), ('ο', "omicron"),
-    ('π', "pi"), ('ρ', "rho"), ('σ', "sigma"), ('τ', "tau"), ('υ', "upsilon"),
-    ('φ', "phi"), ('χ', "chi"), ('ψ', "psi"), ('ω', "omega"),
+    ('α', "alpha"),
+    ('β', "beta"),
+    ('γ', "gamma"),
+    ('δ', "delta"),
+    ('ε', "epsilon"),
+    ('ζ', "zeta"),
+    ('η', "eta"),
+    ('θ', "theta"),
+    ('ι', "iota"),
+    ('κ', "kappa"),
+    ('λ', "lambda"),
+    ('μ', "mu"),
+    ('ν', "nu"),
+    ('ξ', "xi"),
+    ('ο', "omicron"),
+    ('π', "pi"),
+    ('ρ', "rho"),
+    ('σ', "sigma"),
+    ('τ', "tau"),
+    ('υ', "upsilon"),
+    ('φ', "phi"),
+    ('χ', "chi"),
+    ('ψ', "psi"),
+    ('ω', "omega"),
 ];
 
 /// Combining marks: (code point, Latin name, Greek name, extra keywords).
@@ -420,7 +457,8 @@ impl Catalog {
             }
             let mut keywords: Vec<String> = Vec::new();
             for src in [def.native, def.english, def.aliases] {
-                keywords.extend(fold(src).split(|c: char| !c.is_alphanumeric()).filter(|w| w.len() > 1).map(String::from));
+                keywords
+                    .extend(fold(src).split(|c: char| !c.is_alphanumeric()).filter(|w| w.len() > 1).map(String::from));
             }
             cat.sections.push(Section { def, entries: ids, keywords });
         }
@@ -442,10 +480,10 @@ impl Catalog {
         for s in spec {
             if s == "*" {
                 star = true;
-            } else if let Some(i) = self.section_index(s) {
-                if !order.contains(&i) {
-                    order.push(i);
-                }
+            } else if let Some(i) = self.section_index(s)
+                && !order.contains(&i)
+            {
+                order.push(i);
             }
         }
         if star || order.is_empty() {
@@ -532,11 +570,7 @@ impl Catalog {
     pub fn languages_of(&self, id: u32) -> String {
         let langs = &self.entries[id as usize].langs;
         let names: Vec<&str> = langs.iter().map(|&s| self.sections[s as usize].def.english).collect();
-        if names.len() > 4 {
-            format!("{}, +{} more", names[..4].join(", "), names.len() - 4)
-        } else {
-            names.join(", ")
-        }
+        if names.len() > 4 { format!("{}, +{} more", names[..4].join(", "), names.len() - 4) } else { names.join(", ") }
     }
 }
 

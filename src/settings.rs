@@ -168,10 +168,10 @@ fn key_from_name(p: &str) -> Option<u8> {
     if b.len() == 1 && (b[0].is_ascii_alphanumeric()) {
         return Some(b[0].to_ascii_uppercase());
     }
-    if let Some(n) = p.strip_prefix('f').and_then(|n| n.parse::<u8>().ok()) {
-        if (1..=24).contains(&n) {
-            return Some(0x6F + n);
-        }
+    if let Some(n) = p.strip_prefix('f').and_then(|n| n.parse::<u8>().ok())
+        && (1..=24).contains(&n)
+    {
+        return Some(0x6F + n);
     }
     if let Some(hex) = p.strip_prefix("vk") {
         return u8::from_str_radix(hex, 16).ok();
@@ -370,8 +370,12 @@ impl Settings {
                     }
                 }
                 "order" => {
-                    let list: Vec<String> =
-                        v.split([',', ' ']).map(str::trim).filter(|x| !x.is_empty()).map(|x| x.to_ascii_lowercase()).collect();
+                    let list: Vec<String> = v
+                        .split([',', ' '])
+                        .map(str::trim)
+                        .filter(|x| !x.is_empty())
+                        .map(|x| x.to_ascii_lowercase())
+                        .collect();
                     if !list.is_empty() {
                         s.order = list;
                     }
@@ -413,7 +417,13 @@ impl Settings {
                 "{backdrop}",
                 match self.backdrop {
                     BackdropChoice::Auto => "auto",
-                    BackdropChoice::Acrylic => if cfg!(windows) { "acrylic" } else { "blur" },
+                    BackdropChoice::Acrylic => {
+                        if cfg!(windows) {
+                            "acrylic"
+                        } else {
+                            "blur"
+                        }
+                    }
                     BackdropChoice::Solid => "solid",
                 },
             )

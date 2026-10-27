@@ -268,7 +268,11 @@ impl Theme {
                 text_font: font_or(&["Segoe UI"], ui_font, font_available),
                 title_font: font_or(&["Segoe UI"], ui_font, font_available),
                 glyph_font: font_or(&["Segoe UI"], ui_font, font_available),
-                icon_font: font_or(&["Segoe MDL2 Assets", "Segoe Fluent Icons", "Segoe UI Symbol"], &None, font_available),
+                icon_font: font_or(
+                    &["Segoe MDL2 Assets", "Segoe Fluent Icons", "Segoe UI Symbol"],
+                    &None,
+                    font_available,
+                ),
             },
             Kind::Win11 => Theme {
                 kind,
@@ -328,7 +332,11 @@ impl Theme {
                 text_font: font_or(&["Segoe UI Variable Text", "Segoe UI"], ui_font, font_available),
                 title_font: font_or(&["Segoe UI Variable Display", "Segoe UI"], ui_font, font_available),
                 glyph_font: font_or(&["Segoe UI"], ui_font, font_available),
-                icon_font: font_or(&["Segoe Fluent Icons", "Segoe MDL2 Assets", "Segoe UI Symbol"], &None, font_available),
+                icon_font: font_or(
+                    &["Segoe Fluent Icons", "Segoe MDL2 Assets", "Segoe UI Symbol"],
+                    &None,
+                    font_available,
+                ),
             },
             Kind::Kde => {
                 // Follow the desktop's color scheme unless a forced light or dark
@@ -366,7 +374,11 @@ impl Theme {
                     title_font: font.clone(),
                     glyph_font: font,
                     // Linux draws the icons itself; Windows takes them from its icon fonts.
-                    icon_font: font_or(&["Segoe Fluent Icons", "Segoe MDL2 Assets", "Segoe UI Symbol"], &None, font_available),
+                    icon_font: font_or(
+                        &["Segoe Fluent Icons", "Segoe MDL2 Assets", "Segoe UI Symbol"],
+                        &None,
+                        font_available,
+                    ),
                 }
             }
         }
@@ -385,7 +397,9 @@ impl Theme {
         match f {
             Font::Glyph => spec(&self.glyph_font, self.m.glyph_size, Weight::Normal, Align::Center),
             Font::GlyphSmall => spec(&self.glyph_font, 15.0, Weight::Normal, Align::Center),
-            Font::Title => spec(&self.title_font, if windows10 { 15.0 } else { 14.0 }, Weight::SemiBold, Align::Leading),
+            Font::Title => {
+                spec(&self.title_font, if windows10 { 15.0 } else { 14.0 }, Weight::SemiBold, Align::Leading)
+            }
             Font::Subtitle => spec(&self.text_font, 12.0, Weight::Normal, Align::Leading),
             Font::Search => spec(&self.text_font, 14.0, Weight::Normal, Align::Leading),
             Font::Info => FontSpec { ellipsis: true, ..spec(&self.text_font, 12.0, Weight::Normal, Align::Leading) },
