@@ -12,6 +12,9 @@ AppName={#AppName}
 AppVersion={#AppVersion}
 AppVerName={#AppName} {#AppVersion}
 AppPublisher=elpideus
+AppPublisherURL=https://github.com/elpideus/charpick
+AppSupportURL=https://github.com/elpideus/charpick/issues
+AppUpdatesURL=https://github.com/elpideus/charpick/releases
 DefaultDirName={autopf}\{#AppName}
 DisableDirPage=auto
 DisableProgramGroupPage=yes
@@ -39,6 +42,7 @@ Name: "autostart"; Description: "Start Charpick when I sign in"
 [Files]
 Source: "..\target\release\{#AppExe}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion isreadme skipifsourcedoesntexist
+Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"; Comment: "Pick accented letters and symbols"

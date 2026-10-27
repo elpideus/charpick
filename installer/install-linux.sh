@@ -1,16 +1,20 @@
 #!/bin/sh
 # Installs Charpick for the current user on Linux (KDE Plasma on Wayland).
 #
-#   installer/install-linux.sh                       build, install, start at login, start now
-#   installer/install-linux.sh --no-autostart        the same, without starting at login
-#   installer/install-linux.sh --uninstall           remove Charpick (keeps the settings)
-#   installer/install-linux.sh --uninstall --purge   also remove the settings
+#   sh install.sh                       install, start at login, start now
+#   sh install.sh --no-autostart        the same, without starting at login
+#   sh install.sh --uninstall           remove Charpick (keeps the settings)
+#   sh install.sh --uninstall --purge   also remove the settings
 #
 # Nothing is written outside your home directory and no root rights are needed.
+#
+# In the release download (charpick-linux-x86_64.tar.gz) this script is install.sh,
+# next to the program, already built. In the source folder it is
+# installer/install-linux.sh, and it builds Charpick first, with Rust.
 
 set -eu
 
-root=$(cd "$(dirname "$0")/.." && pwd)
+here=$(cd "$(dirname "$0")" && pwd)
 data_home=${XDG_DATA_HOME:-$HOME/.local/share}
 config_home=${XDG_CONFIG_HOME:-$HOME/.config}
 bin_dir=$HOME/.local/bin
@@ -55,13 +59,19 @@ install_app() {
         *) warn "this is not KDE Plasma. Charpick needs KWin for the picker panel and for typing characters." ;;
     esac
 
-    command -v cargo >/dev/null 2>&1 || die "Rust is needed to build Charpick. Install it from https://rustup.rs and run this again."
-    say "Building Charpick…"
-    (cd "$root" && cargo build --release) ||
-        die "the build failed. It needs the development files of cairo, pango and libxkbcommon
+    if [ -f "$here/charpick" ]; then
+        # The release download: the program is already built, next to this script.
+        src=$here/charpick
+    else
+        root=$(cd "$here/.." && pwd)
+        command -v cargo >/dev/null 2>&1 || die "Rust is needed to build Charpick. Install it from https://rustup.rs and run this again."
+        say "Building Charpick…"
+        (cd "$root" && cargo build --release) ||
+            die "the build failed. It needs the development files of cairo, pango and libxkbcommon
        (Arch: cairo pango libxkbcommon · Debian/Ubuntu: libcairo2-dev libpango1.0-dev libxkbcommon-dev
         · Fedora: cairo-devel pango-devel libxkbcommon-devel) and pkg-config."
-    src=$root/target/release/Charpick
+        src=$root/target/release/Charpick
+    fi
 
     # A reinstall keeps "Start at login" the way it was.
     if [ "$autostart" = auto ]; then

@@ -1,0 +1,92 @@
+# Checks every push to main and every pull request: the versions, formatting, the shell scripts,
+# clippy and the tests, on Windows and on Linux, whose code differs (cfg(windows) and
+# cfg(target_os = "linux")). The release workflow runs the same checks on a tag before it
+# publishes it (workflow_call). Every action is pinned to a commit, with its tag in a comment, as
+# in release.yml.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+# A newer push to a pull request replaces its run in progress. Runs on main and on release tags
+# always finish. The event is part of the group because a call from the release workflow has
+# the release's event and ref.
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/') }}
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  windows:
+    name: Checks on Windows
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The stable branch installs the latest stable Rust.
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        with:
+          toolchain: stable
+          components: clippy
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          # Pull requests reuse main's cache instead of each filling the repository's quota.
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      # --all-features takes in the snapshot feature, a development aid with code of its own.
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features --locked -- -D warnings
+
+      - name: Tests
+        run: cargo test --locked
+
+  linux:
+    name: Checks on Linux
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # What the Linux build links to: cairo, pango and libxkbcommon.
+      - name: System libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends pkg-config libcairo2-dev libpango1.0-dev libxkbcommon-dev
+
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Versions agree
+        run: scripts/version.sh --check
+
+      - name: Formatting
+        run: cargo fmt --check
+
+      # Warnings and errors; style notes are left to taste.
+      - name: Shell scripts
+        run: shellcheck --severity=warning installer/*.sh scripts/*.sh
+
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features --locked -- -D warnings
+
+      - name: Tests
+        run: cargo test --locked
