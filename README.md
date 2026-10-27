@@ -1,6 +1,8 @@
 # Charpick
 
-Charpick is a small picker for accented letters and symbols, styled like the Windows emoji panel (Win+.). It runs on Windows 10 and 11, and on Linux with KDE Plasma, where it looks like a Plasma app.
+Charpick lets you type accented letters and symbols in any app: à, è, ș, ț, ß, ç, ñ, €, °, ±, and hundreds more. Press a shortcut, pick the character, and Charpick types it for you. You don't need to remember codes or change your keyboard layout.
+
+It looks like the Windows emoji panel (Win+.), and runs on **Windows 10 and 11** and on **Linux with KDE Plasma**, where it looks like a Plasma app.
 
 <p>
   <img src="docs/win11-dark.png" alt="Charpick, Windows 11 style, dark theme" width="270">
@@ -8,36 +10,83 @@ Charpick is a small picker for accented letters and symbols, styled like the Win
   <img src="docs/kde-dark.png" alt="Charpick on KDE Plasma, Breeze Dark" width="255">
 </p>
 
-- Press **Win+L** (Windows) or **Meta+,** (KDE Plasma) in any text field. On Windows the picker opens next to the text cursor: to its right, or to its left when there is no room. On Plasma it opens in the middle of the screen.
 - **Italian** comes first, then **Romanian**, German, French, Spanish and Portuguese. Catalan, Dutch, the Nordic, Central European and Baltic languages, Turkish, Greek, Vietnamese and more follow, then punctuation, currency, math and other symbols.
-- **Type to search** by:
-  - letter (`s`)
-  - name (`e grave`, `cedilla`, `euro`)
-  - language, in English, in the language itself or by code (`romanian`, `română`, `ro`)
-- **Arrow keys + Enter** pick a character. Enter types it and closes the picker.
+- **Type to search** by letter (`s`), by name (`e grave`, `cedilla`, `euro`) or by language, in English, in the language itself or by code (`romanian`, `română`, `ro`).
 - **Hold Shift** for uppercase. By default, Caps Lock also gives uppercase.
-- It matches the **Windows 10 or Windows 11** look automatically. On Plasma it uses the **Breeze** look with your color scheme, accent color and font. You can change the style in the tray menu or the settings.
-- The shortcut can be changed from the tray menu (**Change shortcut…**): press the new combination and it is saved.
-- On Windows it is a single 0.4 MB native executable, with no runtime and no background polling. While hidden it uses no CPU.
+- It matches the **Windows 10 or Windows 11** look by itself, and on Plasma the **Breeze** look with your colors, accent color and font.
+- It is small and light: on Windows a single 0.4 MB program that uses no CPU while it waits.
 
-Linux has its own section: [Linux (KDE Plasma)](#linux-kde-plasma). The sections up to it are about Windows.
+Charpick is free and open source software.
 
-## Install
+## Download
 
-Run `Charpick-Setup.exe`. No administrator rights are needed. The installer offers two options:
+| Your computer | What to do |
+| --- | --- |
+| Windows 10 or 11 | Download **[Charpick-Setup.exe](https://github.com/elpideus/charpick/releases/latest/download/Charpick-Setup.exe)** and follow [Install on Windows](#install-on-windows) |
+| Linux with KDE Plasma 6 | Follow [Install on Linux](#install-on-linux-kde-plasma): one line to paste |
 
-- **Open Charpick with Win+L.** Windows asks for administrator approval once (see below).
-- **Start Charpick when I sign in.**
+Every version, with what changed, is on the [Releases page](https://github.com/elpideus/charpick/releases).
 
-Windows SmartScreen may warn about an unknown publisher, because the build is not code-signed. Choose **More info → Run anyway**.
+## Install on Windows
 
-To uninstall, use *Settings → Apps*. Uninstalling gives Win+L back to Windows and removes the startup entry and the settings. It also asks for administrator approval to undo the one-time permission. If you decline, the leftover permission is harmless: it only lets your own account change your own "disable lock" setting.
+1. Download **[Charpick-Setup.exe](https://github.com/elpideus/charpick/releases/latest/download/Charpick-Setup.exe)**.
+2. Open it: click it in your browser's downloads, or double-click it in your **Downloads** folder.
+3. If a blue window says **"Windows protected your PC"**, click **More info**, then **Run anyway**. Windows shows this for programs that are not signed with a paid certificate. It does not mean anything is wrong.
+4. Setup offers two options. If unsure, leave both ticked:
+   - **Open Charpick with Win+L.** Windows asks once *"Do you want to allow this app to make changes to your device?"*: click **Yes**. [Why this is needed](#how-winl-is-taken-over).
+   - **Start Charpick when I sign in.**
+5. Click **Install**, then **Finish**. Charpick starts and says hello in a notification. Its icon sits in the taskbar corner, next to the clock (click the **^** arrow if you don't see it).
 
-## Using it
+No administrator account is needed. Charpick installs for you only.
+
+> [!IMPORTANT]
+> **Win+L now opens Charpick instead of locking your PC.** To lock your PC, press **Ctrl+Win+L**, or choose **Lock this PC** in Charpick's tray menu. Your PC still locks by itself when you leave it.
+
+**Rather keep Win+L for locking?** Untick the first option in Setup. Then right-click Charpick's tray icon, choose **Change shortcut…**, and press the shortcut you want, for example **Ctrl+Alt+Space**.
+
+**To update** Charpick, download and run the newest `Charpick-Setup.exe`. It replaces the old version and keeps your settings.
+
+**To uninstall** it, open **Settings → Apps → Installed apps** (on Windows 10: **Apps & features**), find **Charpick** and choose **Uninstall**. This gives Win+L back to Windows and removes Charpick's settings. Windows asks for approval once more, to undo the one-time permission. If you decline, the leftover permission is harmless: it only lets your own account change your own "disable lock" setting.
+
+## Install on Linux (KDE Plasma)
+
+Charpick needs **KDE Plasma 6** in a **Wayland** session, the default on current KDE systems. To check, open **System Settings → About this System**: it should say *KDE Plasma Version: 6.something* and *Graphics Platform: Wayland*.
+
+1. Open **Konsole**: press the Meta key (the Windows key), type `Konsole` and press Enter.
+2. Copy this line, paste it into Konsole with **Ctrl+Shift+V**, and press **Enter**:
+
+   ```bash
+   curl -fsSL https://github.com/elpideus/charpick/releases/latest/download/charpick-linux-x86_64.tar.gz | tar xz -C /tmp && sh /tmp/charpick/install.sh
+   ```
+
+3. Charpick starts and says hello in a notification. Its icon is in the system tray.
+
+It doesn't ask for your password: Charpick installs into your home folder, for you only. It also starts by itself when you log in. To stop that, untick **Start at login** in its tray menu.
+
+**To update** Charpick, run the same line again. Your settings stay as they are.
+
+**To uninstall** it, run:
+
+```bash
+curl -fsSL https://github.com/elpideus/charpick/releases/latest/download/charpick-linux-x86_64.tar.gz | tar xz -C /tmp && sh /tmp/charpick/install.sh --uninstall
+```
+
+This removes the program, its menu entry, its login entry and its shortcut, and keeps your settings. Put `--purge` after `--uninstall` to delete the settings too.
+
+**Prefer not to paste a command from the internet?** Download [charpick-linux-x86_64.tar.gz](https://github.com/elpideus/charpick/releases/latest/download/charpick-linux-x86_64.tar.gz). In Dolphin, right-click it and choose **Extract → Extract archive here**. Open the `charpick` folder; `install.sh` in it is the script the line above runs, and you can read it first. Then press **Shift+F4** to open a terminal in that folder, type `sh install.sh` and press Enter.
+
+## How to use it
+
+1. Click where you want to type: a document, an email, a chat, a search box.
+2. Press **Win+L** on Windows, or **Meta+,** on KDE Plasma (Meta is the Windows key, `,` is the comma key).
+3. Type a few letters to search, for example `e grave`, `cedilla`, `euro` or `romanian`.
+4. Pick the character with the arrow keys and press **Enter**, or click it. Charpick types it in your app.
+
+Hold **Shift** for uppercase letters. **Esc** closes Charpick without typing anything.
 
 | Key | Action |
 | --- | --- |
-| Win+L | Open or close the picker |
+| Win+L (Windows), Meta+, (Plasma) | Open or close the picker |
 | Typing | Search |
 | ← → ↑ ↓, Page Up/Down, Home/End | Move the selection |
 | Tab / Shift+Tab | Next / previous language |
@@ -46,26 +95,41 @@ To uninstall, use *Settings → Apps*. Uninstalling gives Win+L back to Windows 
 | Backspace / Ctrl+Backspace | Delete a character / a word of the search |
 | Delete | Clear the search |
 | Esc | Clear the search, then close |
-| **Ctrl+Win+L** | Lock the PC |
+| **Ctrl+Win+L** (Windows) | Lock the PC |
 
-- Clicking a character types it and leaves the picker open. To have clicks close it too, set `close_on_click = on`.
-- Mouse wheel scrolls; the tabs at the bottom jump to a language.
+- The mouse wheel scrolls; the tabs at the bottom jump to a language.
 - Clicking anywhere else, or switching windows, closes the picker.
-- The picker never takes the keyboard focus away from your app, just like the emoji panel. Your text cursor and selection stay where they were.
+- Recently used characters come first.
 
-The tray icon menu has:
+Right-click Charpick's **tray icon** for its menu:
 
-- The current shortcut, and Change shortcut…
-- Lock this PC (or *Let Win+L open Charpick…* until the setup below is done)
-- Style (Automatic / Windows 10 / Windows 11 / KDE Plasma)
-- Theme (Automatic / Light / Dark)
-- Start with Windows
-- Clear recently used
-- Edit settings…
-- How to use
-- Quit Charpick
+- **Change shortcut…**: press the new combination and it is saved.
+- **Style** (Automatic, Windows 10, Windows 11, KDE Plasma) and **Theme** or **Colors** (Automatic, Light, Dark).
+- **Start with Windows** or **Start at login**.
+- **Clear recently used**, **Edit settings…**, **How to use** and **Quit Charpick**.
+- On Windows also **Lock this PC**.
 
-## How Win+L is taken over
+## Questions and problems
+
+**Windows: Win+L still locks my PC.** The one-time Win+L setup was skipped. Right-click Charpick's tray icon, choose **Let Win+L open Charpick…** and click **Yes** when Windows asks. Or pick another shortcut with **Change shortcut…**.
+
+**Windows: how do I lock my PC now?** Press **Ctrl+Win+L**, or choose **Lock this PC** in the tray menu. Automatic locking keeps working: when the PC is idle, when it wakes from sleep, and with Dynamic Lock.
+
+**Windows: the character is not typed in one app.** Windows does not let normal programs type into apps that run as administrator. Charpick opens over them, but cannot insert the character there.
+
+**Windows: the picker opens next to the mouse instead of next to the text.** Some apps don't tell Windows where their text cursor is. Charpick then opens next to the mouse pointer.
+
+**Linux: Konsole says `curl: command not found`.** Install curl first: `sudo apt install curl` on Kubuntu and KDE neon, then run the line again.
+
+**Linux: Charpick does not start, or says it cannot start.** It needs a Wayland session. Log out, and on the login screen choose **Plasma (Wayland)** before logging back in.
+
+**Linux: the shortcut does nothing.** Open **System Settings → Keyboard → Shortcuts → Charpick** and check the shortcut there, or set a new one with **Change shortcut…** in the tray menu.
+
+**Something else?** [Open an issue](https://github.com/elpideus/charpick/issues) and describe what happens.
+
+## Windows in detail
+
+### How Win+L is taken over
 
 Windows handles Win+L itself, before any app can see the key. The only supported way to stop it is the per-user policy `DisableLockWorkstation`. Charpick sets that policy only while it is needed:
 
@@ -82,7 +146,13 @@ If you skip the setup, Win+L keeps locking the PC and the picker cannot open. In
 
 If your organization already disables locking through policy, Charpick detects that. Win+L then simply opens the picker.
 
-## Settings
+### Picker behavior
+
+- The picker opens next to the text cursor: to its right, or to its left when there is no room.
+- Clicking a character types it and leaves the picker open. To have clicks close it too, set `close_on_click = on`.
+- The picker never takes the keyboard focus away from your app, just like the emoji panel. Your text cursor and selection stay where they were.
+
+### Settings
 
 The tray menu's **Edit settings** opens `%APPDATA%\Charpick\settings.ini`. Changes apply the next time the picker opens.
 
@@ -104,45 +174,25 @@ Section codes:
 - Languages: `it ro de fr es pt ca nl sv no da fi is pl cs sk hu hr sl tr et lv lt sq mt cy ga eo vi el`
 - Symbols: `punct currency math numbers misc`
 
-## Limitations
+### Limitations
 
 - Windows does not let a normal app type into **apps running as administrator** (UIPI). The picker opens over them, but the character is not inserted.
 - The text cursor position comes from accessibility APIs. Apps that do not report it get the picker next to the mouse pointer instead.
 - While the picker is open it reads the keyboard through a low-level hook, as the emoji panel does. Keys that are not meant for the picker close it and pass through: shortcuts with Ctrl, Alt or Win.
 
-## Linux (KDE Plasma)
+## Linux in detail
 
-Charpick runs on **KDE Plasma 6 in a Wayland session**. It uses KWin to show the picker above other windows and to type the character, and Plasma's shortcut service for its shortcut.
+Charpick uses KWin to show the picker above other windows and to type the character, and Plasma's shortcut service for its shortcut.
 
-### Install
+The installer puts:
 
-Building needs Rust ([rustup.rs](https://rustup.rs)), `pkg-config`, and the development files for cairo, pango and libxkbcommon:
-
-| Distribution | Packages |
-| --- | --- |
-| Arch, CachyOS, Manjaro, EndeavourOS | `cairo pango libxkbcommon pkgconf` (usually installed already) |
-| Debian, Ubuntu, KDE neon, Kubuntu | `pkg-config libcairo2-dev libpango1.0-dev libxkbcommon-dev` |
-| Fedora, openSUSE | `pkgconf cairo-devel pango-devel libxkbcommon-devel` |
-
-Then, in the source folder:
-
-```bash
-sh installer/install-linux.sh
-```
-
-The script builds Charpick and installs it for your account only, with no root rights:
-
-- the program, `~/.local/bin/charpick`
+- the program in `~/.local/bin/charpick`
 - an entry in the application launcher, `~/.local/share/applications/charpick.desktop`
-- start at login, `~/.config/autostart/charpick.desktop`. Leave it out with `--no-autostart`, or turn it off later in the tray menu.
-
-Then it starts Charpick, which greets you with a notification. Run the script again to update; it keeps your settings and your *Start at login* choice.
-
-To uninstall, run `sh installer/install-linux.sh --uninstall`. This removes the program, the launcher entry, the login entry and the shortcut. Add `--purge` to delete the settings too.
+- start at login, `~/.config/autostart/charpick.desktop`. Leave it out with `sh install.sh --no-autostart`, or turn it off later in the tray menu.
 
 ### The shortcut
 
-The default is **Meta+,** (Meta is the Windows/Super key, `,` is the comma key). Charpick registers it as a Plasma global shortcut, so it works in every app.
+The default is **Meta+,**. Charpick registers it as a Plasma global shortcut, so it works in every app.
 
 To change it:
 
@@ -152,16 +202,14 @@ To change it:
 
 The three stay in sync: a change in one place shows up in the others.
 
-### Using it
+### Picker behavior
 
-The keys are the same as on Windows (see [Using it](#using-it)), with Meta+, in place of Win+L. Some things differ:
+The keys are the same as on Windows, with Meta+, in place of Win+L. Some things differ:
 
 - The picker opens in the middle of the screen. Wayland does not tell an app where another app's text cursor is.
 - The picker takes the keyboard while it is open. **Enter** or a **click** gives the keyboard back to your app, types the character there and closes the picker. Clicking outside the picker or pressing Esc closes it.
 - Characters missing from your keyboard layout are typed too.
 - Clicking the tray icon opens and closes the picker.
-
-The tray menu has: Open Charpick, Change shortcut…, Style, Colors, Start at login, Clear recently used, Edit settings…, How to use, and Quit.
 
 ### Look
 
@@ -172,7 +220,7 @@ The tray menu has: Open Charpick, Change shortcut…, Style, Colors, Start at lo
 
 ### Settings
 
-The tray menu's **Edit settings…** opens `~/.config/charpick/settings.ini`. Changes apply within a few seconds. The settings are the ones in [Settings](#settings), except:
+The tray menu's **Edit settings…** opens `~/.config/charpick/settings.ini`. Changes apply within a few seconds. The settings are the ones in [Windows settings](#settings), except:
 
 - `style` defaults to `auto`, which means the KDE Plasma look.
 - `backdrop` is `auto`, `blur` or `solid`.
@@ -202,9 +250,25 @@ KDE Plasma is the supported desktop. X11 sessions and GNOME do not work: Charpic
 
 ## Building from source
 
-On Linux, `installer/install-linux.sh` builds and installs Charpick ([Linux (KDE Plasma)](#linux-kde-plasma)). `cargo build --release` alone builds `target/release/Charpick`.
+### Linux
 
-On Windows, the requirements are:
+Building needs Rust ([rustup.rs](https://rustup.rs)), `pkg-config`, and the development files for cairo, pango and libxkbcommon:
+
+| Distribution | Packages |
+| --- | --- |
+| Arch, CachyOS, Manjaro, EndeavourOS | `cairo pango libxkbcommon pkgconf` (usually installed already) |
+| Debian, Ubuntu, KDE neon, Kubuntu | `pkg-config libcairo2-dev libpango1.0-dev libxkbcommon-dev` |
+| Fedora, openSUSE | `pkgconf cairo-devel pango-devel libxkbcommon-devel` |
+
+Then, in the source folder:
+
+- `sh installer/install-linux.sh` builds Charpick and installs it, as the release download does. It takes the same options (`--no-autostart`, `--uninstall`, `--purge`).
+- `sh installer/build-linux.sh` builds the release download, `dist/charpick-linux-x86_64.tar.gz`.
+- `cargo build --release` alone builds `target/release/Charpick`.
+
+### Windows
+
+The requirements are:
 
 - Rust (stable, MSVC toolchain)
 - Inno Setup 6.3 or later, for the installer
@@ -215,10 +279,6 @@ powershell -NoProfile -ExecutionPolicy Bypass -File installer/build.ps1
 
 This builds `target\release\Charpick.exe` and `dist\Charpick-Setup.exe`.
 
-- `tools/make-icons.ps1` regenerates the icons in `assets/`.
-- `cargo test` runs the unit tests (catalog, search, settings parsing).
-- `cargo run --release --features snapshot -- --snapshot out.png --style win10 --theme dark --query ro` renders the picker to a PNG without showing it. This works on both systems. Add `--style kde` for the Plasma look, or `--prompt` for the shortcut prompt.
-
 Command-line options on Windows:
 
 - `--demo` opens the picker right away.
@@ -226,6 +286,12 @@ Command-line options on Windows:
 - `--style`, `--theme` and `--backdrop` override the settings for one run.
 - `--quit` closes the running copy.
 - `--log` replaces the running copy with one that writes a diagnostic log to `%APPDATA%\Charpick\debug.log`. The log records only modifier keys, the shortcut keys and the picker's own events, never what you type. The next sign-in starts Charpick without the log again.
+
+### Both systems
+
+- `cargo test` runs the unit tests (catalog, search, settings parsing).
+- `cargo run --release --features snapshot -- --snapshot out.png --style win10 --theme dark --query ro` renders the picker to a PNG without showing it. Add `--style kde` for the Plasma look, or `--prompt` for the shortcut prompt.
+- `tools/make-icons.ps1` regenerates the icons in `assets/`.
 
 Code layout:
 
@@ -247,6 +313,22 @@ Code layout:
 | `src/linux/kde.rs` | Linux: reading the Plasma color scheme and font |
 | `src/linux/tray.rs`, `src/linux/ipc.rs` | Linux: tray icon and menu; one Charpick per session |
 
+## Making a release
+
+Every push to `main` and every pull request runs the checks in [`.github/workflows/ci.yml`](.github/workflows/ci.yml): formatting, clippy and the tests on Windows and Linux, the shell scripts, and that the version agrees everywhere it is written.
+
+A release is a `v*` tag. To cut one from an up-to-date, clean `main`:
+
+```bash
+scripts/release.sh 1.0.4           # or 1.1.0-beta.1 for a pre-release
+```
+
+The script sets the version in `Cargo.toml`, `Cargo.lock`, `charpick.rc` and `installer/charpick.iss` (`scripts/version.sh`), commits it as *Release v1.0.4*, tags it and pushes both. The tag starts [`.github/workflows/release.yml`](.github/workflows/release.yml), which runs the checks again, builds `Charpick-Setup.exe` on Windows and `charpick-linux-x86_64.tar.gz` on Ubuntu 22.04, and publishes a GitHub release with them, their `SHA256SUMS`, and notes listing the commits since the previous release (`scripts/release-notes.sh`). A version with a `-` is published as a pre-release, which the download links above skip.
+
+Running the Release workflow by hand (Actions → Release → Run workflow) builds the downloads from any branch and keeps them as workflow artifacts, without publishing anything.
+
 ## License
 
-Charpick is free software, released under the GNU General Public License v3 or later. See [`LICENSE`](LICENSE).
+Charpick is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [`LICENSE`](LICENSE).
+
+It is distributed in the hope that it will be useful, but without any warranty; without even the implied warranty of merchantability or fitness for a particular purpose.
