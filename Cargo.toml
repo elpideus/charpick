@@ -1,0 +1,80 @@
+[package]
+name = "charpick"
+version = "1.0.3"
+edition = "2024"
+description = "A fast accented-letter and symbol picker for Windows and Linux (KDE Plasma)"
+authors = ["elpideus"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/elpideus/charpick"
+build = "build.rs"
+
+[[bin]]
+name = "Charpick"
+path = "src/main.rs"
+
+[target.'cfg(windows)'.dependencies]
+windows-core = "0.62"
+
+[target.'cfg(windows)'.dependencies.windows]
+version = "0.62"
+features = [
+    "Win32_Foundation",
+    "Win32_Globalization",
+    "Win32_Graphics_Direct2D",
+    "Win32_Graphics_Direct2D_Common",
+    "Win32_Graphics_DirectWrite",
+    "Win32_Graphics_Dwm",
+    "Win32_Graphics_Dxgi_Common",
+    "Win32_Graphics_Gdi",
+    "Win32_Security",
+    "Win32_Security_Authorization",
+    "Win32_System_Com",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Ole",
+    "Win32_System_Power",
+    "Win32_System_ProcessStatus",
+    "Win32_System_Registry",
+    "Win32_System_RemoteDesktop",
+    "Win32_System_Shutdown",
+    "Win32_System_SystemInformation",
+    "Win32_System_Threading",
+    "Win32_System_Variant",
+    "Win32_UI_Accessibility",
+    "Win32_UI_Controls",
+    "Win32_UI_HiDpi",
+    "Win32_UI_Input",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+]
+
+[target.'cfg(target_os = "linux")'.dependencies]
+smithay-client-toolkit = { version = "0.21", default-features = false, features = ["calloop", "xkbcommon"] }
+wayland-client = "0.31"
+wayland-protocols = { version = "0.32", features = ["client", "staging"] }
+calloop = "0.14"
+calloop-wayland-source = "0.4"
+cairo-rs = { version = "0.22", default-features = false }
+pango = "0.22"
+pangocairo = "0.22"
+zbus = { version = "5", default-features = false, features = ["blocking-api", "async-io"] }
+ksni = { version = "0.3", default-features = false, features = ["blocking", "async-io"] }
+unicode-normalization = "0.1"
+serde = "1"
+xkbcommon = { version = "0.8", features = ["wayland"] }
+wayland-scanner = "0.31"
+
+[features]
+# Development aid: `Charpick --snapshot out.png` renders the picker to a PNG.
+snapshot = ["windows/Win32_Graphics_Imaging", "windows/Win32_System_Com_StructuredStorage", "cairo-rs/png"]
+
+[build-dependencies]
+embed-resource = "3"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+debug = false

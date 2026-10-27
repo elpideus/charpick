@@ -1,0 +1,35 @@
+// Icons: 1 = application, 2 = tray icon for dark taskbars, 3 = tray icon for light taskbars.
+1 ICON "assets/charpick.ico"
+2 ICON "assets/tray-light.ico"
+3 ICON "assets/tray-dark.ico"
+
+1 24 "charpick.manifest"
+
+1 VERSIONINFO
+FILEVERSION 1,0,3,0
+PRODUCTVERSION 1,0,3,0
+FILEFLAGSMASK 0x3F
+FILEFLAGS 0
+FILEOS 0x40004
+FILETYPE 1
+FILESUBTYPE 0
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "elpideus"
+            VALUE "FileDescription", "Charpick"
+            VALUE "FileVersion", "1.0.3"
+            VALUE "InternalName", "Charpick"
+            VALUE "LegalCopyright", "Copyright (C) 2026 elpideus. GNU GPL v3 or later."
+            VALUE "OriginalFilename", "Charpick.exe"
+            VALUE "ProductName", "Charpick"
+            VALUE "ProductVersion", "1.0.3"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
